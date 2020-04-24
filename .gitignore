@@ -1,0 +1,10 @@
+MiniEcs.Tests/.idea/.idea.MiniEcs.Tests/.idea/
+MiniEcs.Tests/.idea/.idea.MiniEcs.Tests/
+MiniEcs.Tests/bin
+MiniEcs.Tests/obj/
+MiniEcs.Tests/report
+MiniEcs/.idea
+MiniEcs/bin
+MiniEcs/obj
+MiniEcs.Tests/coverage.opencover.xml
+.DS_Store
