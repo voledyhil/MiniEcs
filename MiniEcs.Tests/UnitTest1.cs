@@ -3,7 +3,7 @@ using MiniEcs.Core;
 
 namespace MiniEcs.Tests
 {
-    [BTestClass]
+    [TestClass]
     public class UnitTest1
     {
         [TestMethod]

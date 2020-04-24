@@ -1,9 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <LangVersion>latest</LangVersion>
+
+    <TargetFrameworks>netcoreapp2.2</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,5 +24,5 @@
   <ItemGroup>
     <ProjectReference Include="../MiniEcs/MiniEcs.csproj" />
   </ItemGroup>
-
+  
 </Project>
