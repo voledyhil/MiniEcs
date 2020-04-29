@@ -8,3 +8,8 @@ MiniEcs/bin
 MiniEcs/obj
 MiniEcs.Tests/coverage.opencover.xml
 .DS_Store
+MiniEcs.Benchmark/.idea
+MiniEcs.Benchmark/BenchmarkDotNet.Artifacts
+MiniEcs.Benchmark/Entitas
+MiniEcs.Benchmark/bin
+MiniEcs.Benchmark/obj
