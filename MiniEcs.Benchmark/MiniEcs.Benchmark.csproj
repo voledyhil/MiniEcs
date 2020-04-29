@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.12.1" />
+    <PackageReference Include="DesperateDevs.Utils" Version="0.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../MiniEcs/MiniEcs.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="src\EcsComponent.cs.meta" />
+    <None Remove="src\EcsEntity.cs.meta" />
+    <None Remove="src\EcsFilter.cs.meta" />
+    <None Remove="src\EcsHelpers.cs.meta" />
+    <None Remove="src\EcsSystem.cs.meta" />
+    <None Remove="src\EcsWorld.cs.meta" />
+  </ItemGroup>
+
+</Project>

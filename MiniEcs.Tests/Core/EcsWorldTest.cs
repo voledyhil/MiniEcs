@@ -1,124 +1,126 @@
-using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MiniEcs.Core;
 
 namespace MiniEcs.Tests.Core
 {
+    
     [TestClass]
     public class EcsWorldTest
     {
-        private class ComponentA : IEcsComponent
-        {
-        }
-
-        private class ComponentB : IEcsComponent
-        {
-        }
-
-        private class ComponentC : IEcsComponent
-        {
-        }
-        
-        private class ComponentD : IEcsComponent
-        {
-        }
-        
         private static EcsWorld _world;
-        private static uint _entityAB;
-        private static uint _entityABD;
-        private static uint _entityAC;
-        private static uint _entityAD;
-        private static uint _entityBC;
-        private static uint _entityBD0;
-        private static uint _entityBD1;
+        private static EcsEntity _entityAB;
+        private static EcsEntity _entityABD;
+        private static EcsEntity _entityAC;
+        private static EcsEntity _entityAD;
+        private static EcsEntity _entityBC;
+        private static EcsEntity _entityBD0;
+        private static EcsEntity _entityBD1;
 
         [ClassInitialize]
         public static void InitFilterWorld(TestContext testContext)
         {
-            _world = new EcsWorld();
-            _world.RegisterComponent<ComponentA>();
-            _world.RegisterComponent<ComponentB>();
-            _world.RegisterComponent<ComponentC>();
-            _world.RegisterComponent<ComponentD>();
+            _world = new EcsWorld(ComponentType.Capacity);
 
-            _entityABD = _world.CreateEntity(new ComponentA(), new ComponentB(), new ComponentD());
-            _entityAC = _world.CreateEntity(new ComponentA(), new ComponentC());
-            _entityBD0 = _world.CreateEntity(new ComponentB(), new ComponentD());
-            _entityBD1 = _world.CreateEntity(new ComponentB(), new ComponentD());
-            _entityBC = _world.CreateEntity(new ComponentB(), new ComponentC());
-            _entityAB = _world.CreateEntity(new ComponentA(), new ComponentB());
-            _entityAD = _world.CreateEntity(new ComponentA(), new ComponentD());
+            _entityABD = _world.CreateEntity();
+            _entityABD[ComponentType.A] = new ComponentA();
+            _entityABD[ComponentType.B] = new ComponentB();
+            _entityABD[ComponentType.D] = new ComponentD();
+            
+            _entityAC = _world.CreateEntity();
+            _entityAC[ComponentType.A] = new ComponentA();
+            _entityAC[ComponentType.C] = new ComponentC();
+            
+            _entityBD0 = _world.CreateEntity();
+            _entityBD0[ComponentType.B] = new ComponentB();
+            _entityBD0[ComponentType.D] = new ComponentD();
+            
+            _entityBD1 = _world.CreateEntity();
+            _entityBD1[ComponentType.B] = new ComponentB();
+            _entityBD1[ComponentType.D] = new ComponentD();
+
+            _entityBC = _world.CreateEntity();
+            _entityBC[ComponentType.B] = new ComponentB();
+            _entityBC[ComponentType.C] = new ComponentC();
+
+            _entityAB = _world.CreateEntity();
+            _entityAB[ComponentType.A] = new ComponentA();
+            _entityAB[ComponentType.B] = new ComponentB();
+            
+            _entityAD = _world.CreateEntity();
+            _entityAD[ComponentType.A] = new ComponentA();
+            _entityAD[ComponentType.D] = new ComponentD();
         }
 
         [TestMethod]
         public void GetArchetypeTest()
         {
-            EcsWorld world = new EcsWorld();
-            world.RegisterComponent<ComponentA>();
-            world.RegisterComponent<ComponentB>();
-            world.RegisterComponent<ComponentC>();
-            world.RegisterComponent<ComponentD>();
+            EcsWorld world = new EcsWorld(ComponentType.Capacity);
             
-            uint entityA = world.CreateEntity(new ComponentA());
-            uint entityBCA = world.CreateEntity(new ComponentB(), new ComponentC(), new ComponentA());
+            EcsEntity entityA = world.CreateEntity();
+            entityA[ComponentType.A] = new ComponentA();
+            
+            EcsEntity entityBCA = world.CreateEntity();
+            entityBCA[ComponentType.B] = new ComponentB();
+            entityBCA[ComponentType.C] = new ComponentB();
+            entityBCA[ComponentType.A] = new ComponentB();
 
             world.CreateEntity();
-            world.CreateEntity(new ComponentA(), new ComponentB(), new ComponentC());
-            world.CreateEntity(new ComponentB(), new ComponentC(), new ComponentD());
-            world.CreateEntity(new ComponentB(), new ComponentC());
-
+            
+            EcsEntity entityABC = world.CreateEntity();
+            entityABC[ComponentType.A] = new ComponentA();
+            entityABC[ComponentType.B] = new ComponentB();
+            entityABC[ComponentType.C] = new ComponentC();
+            
+            EcsEntity entityBCD = world.CreateEntity();
+            entityBCD[ComponentType.B] = new ComponentB();
+            entityBCD[ComponentType.C] = new ComponentC();
+            entityBCD[ComponentType.D] = new ComponentD();
+            
+            EcsEntity entityBC = world.CreateEntity();
+            entityBC[ComponentType.B] = new ComponentB();
+            entityBC[ComponentType.C] = new ComponentC();
+            
             Assert.AreEqual(1, world.GetArchetype().EntitiesCount);
-            Assert.AreEqual(1, world.GetArchetype(typeof(ComponentA)).EntitiesCount);           
-            Assert.AreEqual(0, world.GetArchetype(typeof(ComponentB)).EntitiesCount);     
-            Assert.AreEqual(1, world.GetArchetype(typeof(ComponentB), typeof(ComponentC)).EntitiesCount);
-            Assert.AreEqual(0, world.GetArchetype(typeof(ComponentC), typeof(ComponentD)).EntitiesCount);
-            Assert.AreEqual(2, world.GetArchetype(typeof(ComponentA), typeof(ComponentB), typeof(ComponentC)).EntitiesCount);
-            Assert.AreEqual(1, world.GetArchetype(typeof(ComponentB), typeof(ComponentC), typeof(ComponentD)).EntitiesCount);   
+            Assert.AreEqual(1, world.GetArchetype(ComponentType.A).EntitiesCount);           
+            Assert.AreEqual(0, world.GetArchetype(ComponentType.B).EntitiesCount);     
+            Assert.AreEqual(1, world.GetArchetype(ComponentType.B, ComponentType.C).EntitiesCount);
+            Assert.AreEqual(0, world.GetArchetype(ComponentType.C, ComponentType.D).EntitiesCount);
+            Assert.AreEqual(2, world.GetArchetype(ComponentType.A, ComponentType.B, ComponentType.C).EntitiesCount);
+            Assert.AreEqual(1, world.GetArchetype(ComponentType.B, ComponentType.C, ComponentType.D).EntitiesCount);   
             
-            world.DestroyEntity(entityBCA);
-            world.DestroyEntity(entityA);
+            entityBCA.Destroy();
+            entityA.Destroy();
             
-            Assert.AreEqual(0, world.GetArchetype(typeof(ComponentA)).EntitiesCount); 
-            Assert.AreEqual(1, world.GetArchetype(typeof(ComponentA), typeof(ComponentB), typeof(ComponentC)).EntitiesCount);
+            Assert.AreEqual(0, world.GetArchetype(ComponentType.A).EntitiesCount); 
+            Assert.AreEqual(1, world.GetArchetype(ComponentType.A, ComponentType.B, ComponentType.C).EntitiesCount);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void GetSetHasRemoveComponentTest()
+        public void GetSetRemoveComponentTest()
         {
-            EcsWorld world = new EcsWorld();
-            world.RegisterComponent<ComponentA>();
-            world.RegisterComponent<ComponentB>();
-            world.RegisterComponent<ComponentC>();
+            EcsWorld world = new EcsWorld(ComponentType.Capacity);
             
             ComponentB componentB = new ComponentB();
-            uint entity = world.CreateEntity(new ComponentA());
-            world.SetComponent(entity, componentB);
-            world.SetComponent(entity, new ComponentC());
+            EcsEntity entity = world.CreateEntity();
+            entity[ComponentType.A] = new ComponentA();
+            entity[ComponentType.B] = componentB;
+            entity[ComponentType.C] = new ComponentC();
 
-            IEcsArchetype archetypeAB = world.GetArchetype(typeof(ComponentA), typeof(ComponentB));
-            IEcsArchetype archetypeAC = world.GetArchetype(typeof(ComponentA), typeof(ComponentC));
-            IEcsArchetype archetypeABC = world.GetArchetype(typeof(ComponentA), typeof(ComponentB), typeof(ComponentC));
+            Assert.IsNotNull(entity[ComponentType.A]);
+            Assert.IsNotNull(entity[ComponentType.C]);
+            Assert.AreEqual(componentB, entity[ComponentType.B]);
+            Assert.IsNull(entity[ComponentType.D]);
 
-            Assert.AreEqual(0, archetypeAB.EntitiesCount);
-            Assert.AreEqual(1, archetypeABC.EntitiesCount);
-            Assert.IsTrue(world.HasComponent<ComponentC>(entity));
-            Assert.AreEqual(componentB, world.GetComponent<ComponentB>(entity));
-
-            world.RemoveComponent<ComponentB>(entity);
-            Assert.IsFalse(world.HasComponent<ComponentB>(entity));
-            Assert.AreEqual(0, archetypeAB.EntitiesCount);
-            Assert.AreEqual(1, archetypeAC.EntitiesCount);
-            Assert.AreEqual(0, archetypeABC.EntitiesCount);
-
-            world.RemoveComponent<ComponentB>(entity); //ExpectedException
+            entity[ComponentType.B] = null;
+            Assert.IsNull(entity[ComponentType.B]);
         }
 
         [TestMethod]
         public void AllFilterTest()
         {
-            List<uint> entities = _world.FilterEntities(new EcsFilter().AllOf<ComponentB>());
+            
+            List<EcsEntity> entities = _world.WithAll(ComponentType.B).ToList();
             Assert.AreEqual(5, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityABD));
@@ -127,7 +129,7 @@ namespace MiniEcs.Tests.Core
             Assert.IsTrue(entities.Contains(_entityBC));
             Assert.IsTrue(entities.Contains(_entityAB));
             
-            entities = _world.FilterEntities(new EcsFilter().AllOf<ComponentB, ComponentD>());
+            entities = _world.WithAll(ComponentType.B, ComponentType.D).ToList();
             Assert.AreEqual(3, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityABD));
@@ -138,7 +140,7 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void AnyFilterTest()
         {
-            List<uint> entities = _world.FilterEntities(new EcsFilter().AnyOf<ComponentB>());
+            List<EcsEntity> entities = _world.WithAny(ComponentType.B).ToList();
             Assert.AreEqual(5, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityABD));
@@ -147,7 +149,7 @@ namespace MiniEcs.Tests.Core
             Assert.IsTrue(entities.Contains(_entityBC));
             Assert.IsTrue(entities.Contains(_entityAB));
             
-            entities = _world.FilterEntities(new EcsFilter().AnyOf<ComponentB, ComponentD>());
+            entities = _world.WithAny(ComponentType.B, ComponentType.D).ToList();
             Assert.AreEqual(6, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityABD));
@@ -161,12 +163,12 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void NoneFilterTest()
         {
-            List<uint> entities = _world.FilterEntities(new EcsFilter().NoneOf<ComponentB, ComponentD>());
+            List<EcsEntity> entities = _world.WithNone(ComponentType.B, ComponentType.D).ToList();
             Assert.AreEqual(1, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityAC));
             
-            entities = _world.FilterEntities(new EcsFilter().NoneOf<ComponentB, ComponentD, ComponentB>());
+            entities = _world.WithNone(ComponentType.B, ComponentType.D, ComponentType.B).ToList();
             Assert.AreEqual(1, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityAC));
@@ -175,11 +177,11 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void AllAnyFilterTest()
         {
-            List<uint> entities = _world.FilterEntities(new EcsFilter().AllOf<ComponentB, ComponentB, ComponentD>().AnyOf<ComponentA>());
+            List<EcsEntity> entities = _world.WithAll(ComponentType.B, ComponentType.B, ComponentType.D).WithAny(ComponentType.A).ToList();
             Assert.AreEqual(1, entities.Count);
             Assert.IsTrue(entities.Contains(_entityABD));
             
-            entities = _world.FilterEntities(new EcsFilter().AllOf<ComponentD, ComponentD>().AnyOf<ComponentB, ComponentC, ComponentC>());
+            entities = _world.WithAll(ComponentType.D, ComponentType.D).WithAny(ComponentType.B, ComponentType.C, ComponentType.C).ToList();
             Assert.AreEqual(3, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityABD));
@@ -191,14 +193,14 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void AllNoneFilterTest()
         {
-            List<uint> entities = _world.FilterEntities(new EcsFilter().AllOf<ComponentB>().NoneOf<ComponentA>());
+            List<EcsEntity> entities = _world.WithAll(ComponentType.B).WithNone(ComponentType.A).ToList();
             Assert.AreEqual(3, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityBD0));
             Assert.IsTrue(entities.Contains(_entityBD1));
             Assert.IsTrue(entities.Contains(_entityBC));
             
-            entities = _world.FilterEntities(new EcsFilter().AllOf<ComponentB, ComponentD>().NoneOf<ComponentA>());
+            entities = _world.WithAll(ComponentType.B, ComponentType.D).WithNone(ComponentType.A).ToList();
             Assert.AreEqual(2, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityBD0));
