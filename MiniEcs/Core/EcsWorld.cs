@@ -17,7 +17,6 @@ namespace MiniEcs.Core
             _archetypeManager = new EcsArchetypeManager(capacity);
         }
 
-
         public EcsEntity CreateEntity()
         {
             return new EcsEntity(_entityCounter++, _archetypeManager, _capacity);
