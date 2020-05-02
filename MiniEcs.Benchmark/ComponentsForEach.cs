@@ -61,7 +61,7 @@ namespace MiniEcs.Benchmark
             public float Y;
         }
 
-        private class MiniEcsSystem
+        private class MiniEcsSystem : IEcsSystem
         {
             private readonly EcsWorld _world;
 
@@ -70,14 +70,14 @@ namespace MiniEcs.Benchmark
                 _world = world;
             }
 
-            public void Execute()
+            public void Update(float deltaTime, EcsWorld world)
             {
                 _world.WithAll(MiniEcsSpeedType, MiniEcsPositionType).ForEach(entity =>
                 {
                     MiniEcsSpeed speed = (MiniEcsSpeed) entity[MiniEcsSpeedType];
                     MiniEcsPosition position = (MiniEcsPosition) entity[MiniEcsPositionType];
-                    position.X += speed.X * Time;
-                    position.Y += speed.Y * Time;
+                    position.X += speed.X * deltaTime;
+                    position.Y += speed.Y * deltaTime;
                 });
             }
         }
@@ -114,7 +114,7 @@ namespace MiniEcs.Benchmark
         public void EntitasForEach() => _entitasSystem.Execute();
 
         [Benchmark]
-        public void MiniEcsForEach() => _miniEcsSystem.Execute();
+        public void MiniEcsForEach() => _miniEcsSystem.Update(Time, _miniEcsWorld);
 
     }
 }
