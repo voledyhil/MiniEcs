@@ -14,7 +14,7 @@ namespace MiniEcs.Core
             foreach (byte type in types)
             {
                 Any.Add(type);
-                _isHashCached = false;
+                _isCached = false;
             }
             return this;
         }
@@ -25,7 +25,7 @@ namespace MiniEcs.Core
             foreach (byte type in types)
             {
                 All.Add(type);
-                _isHashCached = false;
+                _isCached = false;
             }
             return this;
         }
@@ -36,7 +36,7 @@ namespace MiniEcs.Core
             foreach (byte type in types)
             {
                 None.Add(type);
-                _isHashCached = false;
+                _isCached = false;
             }
             return this;
         }
@@ -58,14 +58,13 @@ namespace MiniEcs.Core
         }
         
         
-        public override bool Equals(object obj) {
-            if (obj == null || obj.GetType() != GetType() ||
-                obj.GetHashCode() != GetHashCode()) {
+        public override bool Equals(object obj) 
+        {
+            if (obj == null || obj.GetType() != GetType() || obj.GetHashCode() != GetHashCode()) 
                 return false;
-            }
 
             EcsFilter filter = (EcsFilter)obj;
-
+            
             if (filter.All != null && All != null && !filter.All.SetEquals(All))
                 return false;
 
@@ -77,11 +76,11 @@ namespace MiniEcs.Core
 
 
         private int _hash;
-        private bool _isHashCached;
+        private bool _isCached;
 
         public override int GetHashCode()
         {
-            if (_isHashCached) 
+            if (_isCached) 
                 return _hash;
             
             int hash = GetType().GetHashCode();
@@ -90,7 +89,7 @@ namespace MiniEcs.Core
             hash = ApplyHash(hash, None, 647, 683);
             
             _hash = hash;
-            _isHashCached = true;
+            _isCached = true;
 
             return _hash;
         }

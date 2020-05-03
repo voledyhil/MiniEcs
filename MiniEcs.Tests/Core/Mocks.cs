@@ -5,27 +5,31 @@ namespace MiniEcs.Tests.Core
 
     public static class ComponentType
     {
-        public static byte A = 0;
-        public static byte B = 1;
-        public static byte C = 2;
-        public static byte D = 3;
+        public const byte A = 0;
+        public const byte B = 1;
+        public const byte C = 2;
+        public const byte D = 3;
 
-        public static byte Capacity = 4;
+        public const byte TotalComponents = 4;
     }
 
     public class ComponentA : IEcsComponent
     {
+        public byte Index => ComponentType.A;
     }
 
     public class ComponentB : IEcsComponent
     {
+        public byte Index => ComponentType.B;
     }
 
     public class ComponentC : IEcsComponent
     {
+        public byte Index => ComponentType.C;
     }
 
     public class ComponentD : IEcsComponent
     {
+        public byte Index => ComponentType.D;
     }
 }

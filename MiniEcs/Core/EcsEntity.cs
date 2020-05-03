@@ -13,15 +13,23 @@ namespace MiniEcs.Core
         
         private readonly uint _id;
 
-        public EcsEntity(uint id, EcsArchetypeManager archetypeManager, int capacity)
+        public EcsEntity(uint id, EcsArchetypeManager archetypeManager, int capacity, params IEcsComponent[] components)
         {
             _id = id;
             _archetypeManager = archetypeManager;
             _components = new IEcsComponent[capacity];
-            _indices = new HashSet<byte>();
-            
-            _archetype = _archetypeManager.RootArchetype;
+
+            byte[] indices = new byte[components.Length];
+            for (int i = 0; i < components.Length; i++)
+            {
+                IEcsComponent component = components[i];
+                _components[component.Index] = component;
+                indices[i] = component.Index;
+            }
+
+            _archetype = _archetypeManager.FindOrCreateArchetype(indices);
             _archetype.Entities.Add(id, this);
+            _indices = new HashSet<byte>(indices);
         }
 
         public IEcsComponent this[byte index]
