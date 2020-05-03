@@ -6,16 +6,17 @@ namespace MiniEcs.Core
 {
     public class EcsEntity
     {
+        public uint Id { get; }
+        
         private EcsArchetype _archetype;
         private EcsArchetypeManager _archetypeManager;
         private IEcsComponent[] _components;
         private HashSet<byte> _indices;
-        
-        private readonly uint _id;
 
         public EcsEntity(uint id, EcsArchetypeManager archetypeManager, int capacity, params IEcsComponent[] components)
         {
-            _id = id;
+            Id = id;
+            
             _archetypeManager = archetypeManager;
             _components = new IEcsComponent[capacity];
 
@@ -70,17 +71,17 @@ namespace MiniEcs.Core
             if (indicesCount == _indices.Count)
                 throw new InvalidOperationException();
 
-            _archetype.Entities.Remove(_id);
+            _archetype.Entities.Remove(Id);
 
             if (!edges.TryGetValue(index, out _archetype))
                 _archetype = _archetypeManager.FindOrCreateArchetype(_indices.ToArray());
 
-            _archetype.Entities.Add(_id, this);
+            _archetype.Entities.Add(Id, this);
         }
 
         public void Destroy()
         {
-            _archetype.Entities.Remove(_id);
+            _archetype.Entities.Remove(Id);
             _archetype = null;
             _components = null;
             _indices = null;
