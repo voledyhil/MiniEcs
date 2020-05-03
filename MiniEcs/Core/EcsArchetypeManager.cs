@@ -6,24 +6,25 @@ namespace MiniEcs.Core
     public class EcsArchetypeManager
     {
         public EcsArchetype RootArchetype { get; }
-        
-        private readonly List<EcsArchetype> _allArchetypes = new List<EcsArchetype>();
+
+        private readonly List<EcsArchetype> _allArchetypes;
         private readonly List<EcsArchetype>[] _archetypeIndices;
         
         public EcsArchetypeManager(byte capacity)
         {
             RootArchetype = new EcsArchetype();
-            _allArchetypes.Add(RootArchetype);
             
+            _allArchetypes = new List<EcsArchetype>(2 * capacity) {RootArchetype};
             _archetypeIndices = new List<EcsArchetype>[capacity];
+            
             for (int i = 0; i < capacity; i++)
             {
-                _archetypeIndices[i] = new List<EcsArchetype>();
+                _archetypeIndices[i] = new List<EcsArchetype>(capacity);
             }
         }
 
-        public IEnumerable<EcsArchetype> AllArchetypes => _allArchetypes;
-        public IEnumerable<EcsArchetype> this[byte index] => _archetypeIndices[index];
+        public IReadOnlyList<EcsArchetype> AllArchetypes => _allArchetypes;
+        public IReadOnlyList<EcsArchetype> this[byte index] => _archetypeIndices[index];
 
         public EcsArchetype FindOrCreateArchetype(byte[] indices)
         {

@@ -27,7 +27,7 @@ namespace MiniEcs.Core
             return _archetypeManager.FindOrCreateArchetype(indices);
         }
 
-        public IEnumerable<EcsEntity> Filter(EcsFilter filter)
+        public IEcsGroup Filter(EcsFilter filter)
         {
             byte[] all = filter.All.ToArray();
             byte[] any = filter.Any.ToArray();
@@ -40,13 +40,13 @@ namespace MiniEcs.Core
             {
                 if (all.Length > 0)
                 {
-                    EcsArchetype[][] archetypes = new EcsArchetype[all.Length][];
+                    IReadOnlyList<EcsArchetype>[] archetypes = new IReadOnlyList<EcsArchetype>[all.Length];
                     for (int i = 0; i < all.Length; i++)
                     {
-                        archetypes[i] = _archetypeManager[all[i]].ToArray();
+                        archetypes[i] = _archetypeManager[all[i]];
                     }
 
-                    Array.Sort(archetypes, (a, b) => a.Length - b.Length);
+                    Array.Sort(archetypes, (a, b) => a.Count - b.Count);
 
                     buffer0 = new HashSet<EcsArchetype>(archetypes[0]);
                     for (int i = 1; i < all.Length; i++)
@@ -86,28 +86,7 @@ namespace MiniEcs.Core
                 }
             }
 
-            foreach (EcsArchetype archetype in buffer0)
-            {
-                foreach (EcsEntity entity in archetype.Entities.Values)
-                {
-                    yield return entity;
-                }
-            }
-        }
-
-        public EcsForEach WithAll(params byte[] indices)
-        {
-            return new EcsForEach(this, new EcsFilter().AllOf(indices));
-        }
-                
-        public EcsForEach WithAny(params byte[] indices)
-        {
-            return new EcsForEach(this, new EcsFilter().AnyOf(indices));
-        }
-
-        public EcsForEach WithNone(params byte[] indices)
-        {
-            return new EcsForEach(this, new EcsFilter().NoneOf(indices));
+            return new EcsGroup(_archetypeManager.AllArchetypes.Count, buffer0);
         }
     }
 }
