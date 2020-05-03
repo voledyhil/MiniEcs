@@ -64,21 +64,23 @@ namespace MiniEcs.Benchmark
         private class MiniEcsSystem : IEcsSystem
         {
             private readonly EcsWorld _world;
+            private EcsFilter _filter;
 
             public MiniEcsSystem(EcsWorld world)
             {
                 _world = world;
+                _filter = new EcsFilter().AllOf(MiniEcsSpeedType, MiniEcsPositionType);
             }
 
             public void Update(float deltaTime, EcsWorld world)
             {
-                _world.WithAll(MiniEcsSpeedType, MiniEcsPositionType).ForEach(entity =>
+                foreach (EcsEntity entity in _world.Filter(_filter))
                 {
                     MiniEcsSpeed speed = (MiniEcsSpeed) entity[MiniEcsSpeedType];
                     MiniEcsPosition position = (MiniEcsPosition) entity[MiniEcsPositionType];
                     position.X += speed.X * deltaTime;
                     position.Y += speed.Y * deltaTime;
-                });
+                }
             }
         }
 

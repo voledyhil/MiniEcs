@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MiniEcs.Core;
 
@@ -81,19 +82,19 @@ namespace MiniEcs.Tests.Core
             entityBC[ComponentType.B] = new ComponentB();
             entityBC[ComponentType.C] = new ComponentC();
             
-            Assert.AreEqual(1, world.GetArchetype().EntitiesCount);
-            Assert.AreEqual(1, world.GetArchetype(ComponentType.A).EntitiesCount);           
-            Assert.AreEqual(0, world.GetArchetype(ComponentType.B).EntitiesCount);     
-            Assert.AreEqual(1, world.GetArchetype(ComponentType.B, ComponentType.C).EntitiesCount);
-            Assert.AreEqual(0, world.GetArchetype(ComponentType.C, ComponentType.D).EntitiesCount);
-            Assert.AreEqual(2, world.GetArchetype(ComponentType.A, ComponentType.B, ComponentType.C).EntitiesCount);
-            Assert.AreEqual(1, world.GetArchetype(ComponentType.B, ComponentType.C, ComponentType.D).EntitiesCount);   
+            Assert.AreEqual(1, world.GetArchetype().ToArray().Length);
+            Assert.AreEqual(1, world.GetArchetype(ComponentType.A).ToArray().Length);           
+            Assert.AreEqual(0, world.GetArchetype(ComponentType.B).ToArray().Length);     
+            Assert.AreEqual(1, world.GetArchetype(ComponentType.B, ComponentType.C).ToArray().Length);
+            Assert.AreEqual(0, world.GetArchetype(ComponentType.C, ComponentType.D).ToArray().Length);
+            Assert.AreEqual(2, world.GetArchetype(ComponentType.A, ComponentType.B, ComponentType.C).ToArray().Length);
+            Assert.AreEqual(1, world.GetArchetype(ComponentType.B, ComponentType.C, ComponentType.D).ToArray().Length);   
             
             entityBCA.Destroy();
             entityA.Destroy();
             
-            Assert.AreEqual(0, world.GetArchetype(ComponentType.A).EntitiesCount); 
-            Assert.AreEqual(1, world.GetArchetype(ComponentType.A, ComponentType.B, ComponentType.C).EntitiesCount);
+            Assert.AreEqual(0, world.GetArchetype(ComponentType.A).ToArray().Length); 
+            Assert.AreEqual(1, world.GetArchetype(ComponentType.A, ComponentType.B, ComponentType.C).ToArray().Length);
         }
 
         [TestMethod]
@@ -119,8 +120,7 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void AllFilterTest()
         {
-            
-            List<EcsEntity> entities = _world.WithAll(ComponentType.B).ToList();
+            List<EcsEntity> entities = _world.Filter(new EcsFilter().AllOf(ComponentType.B)).ToList();
             Assert.AreEqual(5, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityABD));
@@ -129,7 +129,7 @@ namespace MiniEcs.Tests.Core
             Assert.IsTrue(entities.Contains(_entityBC));
             Assert.IsTrue(entities.Contains(_entityAB));
             
-            entities = _world.WithAll(ComponentType.B, ComponentType.D).ToList();
+            entities = _world.Filter(new EcsFilter().AllOf(ComponentType.B, ComponentType.D)).ToList();
             Assert.AreEqual(3, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityABD));
@@ -140,7 +140,7 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void AnyFilterTest()
         {
-            List<EcsEntity> entities = _world.WithAny(ComponentType.B).ToList();
+            List<EcsEntity> entities = _world.Filter(new EcsFilter().AnyOf(ComponentType.B)).ToList();
             Assert.AreEqual(5, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityABD));
@@ -149,7 +149,7 @@ namespace MiniEcs.Tests.Core
             Assert.IsTrue(entities.Contains(_entityBC));
             Assert.IsTrue(entities.Contains(_entityAB));
             
-            entities = _world.WithAny(ComponentType.B, ComponentType.D).ToList();
+            entities = _world.Filter(new EcsFilter().AnyOf(ComponentType.B, ComponentType.D)).ToList();
             Assert.AreEqual(6, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityABD));
@@ -163,12 +163,12 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void NoneFilterTest()
         {
-            List<EcsEntity> entities = _world.WithNone(ComponentType.B, ComponentType.D).ToList();
+            List<EcsEntity> entities = _world.Filter(new EcsFilter().NoneOf(ComponentType.B, ComponentType.D)).ToList();
             Assert.AreEqual(1, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityAC));
             
-            entities = _world.WithNone(ComponentType.B, ComponentType.D, ComponentType.B).ToList();
+            entities = _world.Filter(new EcsFilter().NoneOf(ComponentType.B, ComponentType.D, ComponentType.B)).ToList();
             Assert.AreEqual(1, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityAC));
@@ -177,11 +177,11 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void AllAnyFilterTest()
         {
-            List<EcsEntity> entities = _world.WithAll(ComponentType.B, ComponentType.B, ComponentType.D).WithAny(ComponentType.A).ToList();
+            List<EcsEntity> entities = _world.Filter(new EcsFilter().AllOf(ComponentType.B, ComponentType.B, ComponentType.D).AnyOf(ComponentType.A)).ToList();
             Assert.AreEqual(1, entities.Count);
             Assert.IsTrue(entities.Contains(_entityABD));
             
-            entities = _world.WithAll(ComponentType.D, ComponentType.D).WithAny(ComponentType.B, ComponentType.C, ComponentType.C).ToList();
+            entities = _world.Filter(new EcsFilter().AllOf(ComponentType.D, ComponentType.D).AnyOf(ComponentType.B, ComponentType.C, ComponentType.C)).ToList();
             Assert.AreEqual(3, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityABD));
@@ -193,14 +193,14 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void AllNoneFilterTest()
         {
-            List<EcsEntity> entities = _world.WithAll(ComponentType.B).WithNone(ComponentType.A).ToList();
+            List<EcsEntity> entities = _world.Filter(new EcsFilter().AllOf(ComponentType.B).NoneOf(ComponentType.A)).ToList();
             Assert.AreEqual(3, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityBD0));
             Assert.IsTrue(entities.Contains(_entityBD1));
             Assert.IsTrue(entities.Contains(_entityBC));
             
-            entities = _world.WithAll(ComponentType.B, ComponentType.D).WithNone(ComponentType.A).ToList();
+            entities = _world.Filter(new EcsFilter().AllOf(ComponentType.B, ComponentType.D).NoneOf(ComponentType.A)).ToList();
             Assert.AreEqual(2, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityBD0));
