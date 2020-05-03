@@ -7,6 +7,8 @@ namespace MiniEcs.Core
     public class EcsWorld
     {
         private uint _entityCounter = 0;
+        
+        private readonly Dictionary<uint, EcsEntity> _entities = new Dictionary<uint, EcsEntity>();
         private readonly EcsArchetypeManager _archetypeManager;
 
         private readonly int _capacity;
@@ -17,9 +19,15 @@ namespace MiniEcs.Core
             _archetypeManager = new EcsArchetypeManager(capacity);
         }
 
+        public EcsEntity this[uint id] => _entities[id];
+
         public EcsEntity CreateEntity(params IEcsComponent[] components)
         {
-            return new EcsEntity(_entityCounter++, _archetypeManager, _capacity, components);
+            uint id = _entityCounter++;
+            EcsEntity entity = new EcsEntity(id, _archetypeManager, _capacity, components);
+            _entities.Add(id, entity);
+
+            return entity;
         }
 
         public IEcsArchetype GetArchetype(params byte[] indices)
@@ -30,30 +38,32 @@ namespace MiniEcs.Core
         private readonly Dictionary<EcsFilter, EcsGroup> _groups = new Dictionary<EcsFilter, EcsGroup>();
         public IEcsGroup Filter(EcsFilter filter)
         {
+            byte[] all = filter.All?.ToArray();
+            byte[] any = filter.Any?.ToArray();
+            byte[] none = filter.None?.ToArray();
+            
             int version = _archetypeManager.ArchetypeCount - 1;
             if (_groups.TryGetValue(filter, out EcsGroup group))
             {
                 if (group.Version < version)
-                    group.Add(version, GetArchetypes(filter, version));
+                    group.Add(version, GetArchetypes(all, any, none, version));
                 return group;
             }
 
-            group = new EcsGroup(version, GetArchetypes(filter, 0));
+            group = new EcsGroup(version, GetArchetypes(all, any, none, 0));
             _groups.Add(filter.Clone(), group);
             return group;
         }
 
-        private IEnumerable<EcsArchetype> GetArchetypes(EcsFilter filter, int startId)
+        private IEnumerable<EcsArchetype> GetArchetypes(byte[] all, byte[] any, byte[] none, int startId)
         {
             HashSet<EcsArchetype> buffer0 = null;
             HashSet<EcsArchetype> buffer1 = null;
 
-            if (filter.All != null || filter.Any != null)
+            if (all != null || any != null)
             {
-                if (filter.All != null)
+                if (all != null)
                 {
-                    byte[] all = filter.All.ToArray();
-
                     IReadOnlyList<EcsArchetype>[] archetypes = new IReadOnlyList<EcsArchetype>[all.Length];
                     for (int i = 0; i < all.Length; i++)
                     {
@@ -69,10 +79,8 @@ namespace MiniEcs.Core
                     }
                 }
 
-                if (filter.Any != null)
+                if (any != null)
                 {
-                    byte[] any = filter.Any.ToArray();
-
                     buffer1 = new HashSet<EcsArchetype>(_archetypeManager.GetArchetypes(any[0], startId));
                     for (int i = 1; i < any.Length; i++)
                     {
@@ -94,9 +102,9 @@ namespace MiniEcs.Core
                 buffer0 = new HashSet<EcsArchetype>(_archetypeManager.GetArchetypes(startId));
             }
 
-            if (filter.None != null)
+            if (none != null)
             {
-                foreach (byte type in filter.None)
+                foreach (byte type in none)
                 {
                     buffer0.ExceptWith(_archetypeManager.GetArchetypes(type, startId));
                 }

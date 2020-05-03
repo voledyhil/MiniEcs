@@ -5,6 +5,7 @@ namespace MiniEcs.Core
 {
     public interface IEcsArchetype : IEnumerable<EcsEntity>
     {
+        EcsEntity this[uint id] { get; }
     }
     
     public class EcsArchetype : IEcsArchetype
@@ -19,6 +20,8 @@ namespace MiniEcs.Core
         public readonly Dictionary<uint, EcsEntity> Entities = new Dictionary<uint, EcsEntity>();
         public readonly Dictionary<byte, EcsArchetype> Next = new Dictionary<byte, EcsArchetype>();
         public readonly Dictionary<byte, EcsArchetype> Prior = new Dictionary<byte, EcsArchetype>();
+        
+        public EcsEntity this[uint id] => Entities[id];
         
         public IEnumerator<EcsEntity> GetEnumerator()
         {
