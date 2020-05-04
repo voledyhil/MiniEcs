@@ -30,6 +30,18 @@ namespace MiniEcs.Core
             return entity;
         }
 
+        public void AddComponents(EcsFilter filter, params IEcsComponent[] components)
+        {
+            List<EcsEntity> entities = new List<EcsEntity>(Filter(filter));
+            foreach (EcsEntity entity in entities)
+            {
+                foreach (IEcsComponent component in components)
+                {
+                    entity[component.Index] = component;
+                }
+            }
+        }
+
         public IEcsArchetype GetArchetype(params byte[] indices)
         {
             return _archetypeManager.FindOrCreateArchetype(indices);
