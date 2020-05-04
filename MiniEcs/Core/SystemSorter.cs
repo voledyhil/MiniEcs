@@ -75,7 +75,7 @@ namespace MiniEcs.Core
             while (size > 0)
             {
                 int index = indices[0];
-                indices[0] = indices[size--];
+                indices[0] = indices[--size];
                 SystemDependencies<T> sd = dependencies[index];
 
                 systems.Add(sd.System);
