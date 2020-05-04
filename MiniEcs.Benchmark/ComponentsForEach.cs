@@ -51,12 +51,14 @@ namespace MiniEcs.Benchmark
 
         private class MiniEcsSpeed : IEcsComponent
         {
+            public byte Index => MiniEcsSpeedType;
             public float X;
             public float Y;
         }
 
         private class MiniEcsPosition : IEcsComponent
         {
+            public byte Index => MiniEcsPositionType;
             public float X;
             public float Y;
         }

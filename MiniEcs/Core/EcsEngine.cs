@@ -7,9 +7,9 @@ namespace MiniEcs.Core
         private readonly List<IEcsSystem> _systems = new List<IEcsSystem>();
         private bool _dirty;
 
-        public void CreateSystem<T>() where T : class, IEcsSystem, new()
+        public void AddSystem(IEcsSystem system)
         {
-            _systems.Add(new T());
+            _systems.Add(system);
             _dirty = true;
         }
 
