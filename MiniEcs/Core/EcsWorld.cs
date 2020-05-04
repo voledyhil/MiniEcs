@@ -30,7 +30,7 @@ namespace MiniEcs.Core
             return entity;
         }
 
-        public void AddComponents(EcsFilter filter, params IEcsComponent[] components)
+        public void AddSharedComponents(EcsFilter filter, params IEcsComponent[] components)
         {
             List<EcsEntity> entities = new List<EcsEntity>(Filter(filter));
             foreach (EcsEntity entity in entities)
