@@ -8,7 +8,6 @@ namespace MiniEcs.Core
     {
         private uint _entityCounter = 0;
         
-        private readonly Dictionary<uint, EcsEntity> _entities = new Dictionary<uint, EcsEntity>();
         private readonly EcsArchetypeManager _archetypeManager;
 
         private readonly int _capacity;
@@ -19,27 +18,23 @@ namespace MiniEcs.Core
             _archetypeManager = new EcsArchetypeManager(capacity);
         }
 
-        public EcsEntity this[uint id] => _entities[id];
-
         public EcsEntity CreateEntity(params IEcsComponent[] components)
         {
-            uint id = _entityCounter++;
-            EcsEntity entity = new EcsEntity(id, _archetypeManager, _capacity, components);
-            _entities.Add(id, entity);
-
-            return entity;
+            return new EcsEntity(_entityCounter++, _archetypeManager, _capacity, components);
         }
 
-        public void AddSharedComponents(EcsFilter filter, params IEcsComponent[] components)
+        public T GetOrCreateSingleton<T>(byte index) where T : class, IEcsComponent, new()
         {
-            List<EcsEntity> entities = new List<EcsEntity>(Filter(filter));
-            foreach (EcsEntity entity in entities)
+            IEcsArchetype archetype = GetArchetype(index);
+
+            foreach (EcsEntity entity in archetype)
             {
-                foreach (IEcsComponent component in components)
-                {
-                    entity[component.Index] = component;
-                }
+                return (T) entity[index];
             }
+
+            T component = new T();
+            CreateEntity(component);
+            return component;
         }
 
         public IEcsArchetype GetArchetype(params byte[] indices)
@@ -58,7 +53,7 @@ namespace MiniEcs.Core
             if (_groups.TryGetValue(filter, out EcsGroup group))
             {
                 if (group.Version < version)
-                    group.Add(version, GetArchetypes(all, any, none, version));
+                    group.IncVersion(version, GetArchetypes(all, any, none, group.Version));
                 return group;
             }
 

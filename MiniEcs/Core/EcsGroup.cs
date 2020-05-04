@@ -5,29 +5,42 @@ namespace MiniEcs.Core
 {
     public interface IEcsGroup : IEnumerable<EcsEntity>
     {
-        
+        EcsEntity this[uint id] { get; }
     }
     
     public class EcsGroup : IEcsGroup
     {
         public int Version { get; private set; }
-        private readonly List<IEcsArchetype> _archetypes;
+        private readonly List<EcsArchetype> _archetypes;
         
-        public EcsGroup(int version, IEnumerable<IEcsArchetype> archetypes)
+        public EcsGroup(int version, IEnumerable<EcsArchetype> archetypes)
         {
             Version = version;
-            _archetypes = new List<IEcsArchetype>(archetypes);
+            _archetypes = new List<EcsArchetype>(archetypes);
         }
 
-        public void Add(int version, IEnumerable<IEcsArchetype> archetypes)
+        public void IncVersion(int newVersion, IEnumerable<EcsArchetype> newArchetypes)
         {
-            Version = version;
-            _archetypes.AddRange(archetypes);
+            Version = newVersion;
+            _archetypes.AddRange(newArchetypes);
+        }
+        
+        public EcsEntity this[uint id]
+        {
+            get
+            {
+                foreach (EcsArchetype archetype in _archetypes)
+                {
+                    if (archetype.TryGetEntity(id, out EcsEntity entity))
+                        return entity;
+                }
+                throw new KeyNotFoundException();
+            }
         }
         
         public IEnumerator<EcsEntity> GetEnumerator()
         {
-            foreach (IEcsArchetype archetype in _archetypes)
+            foreach (EcsArchetype archetype in _archetypes)
             {
                 foreach (EcsEntity entity in archetype)
                 {

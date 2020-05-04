@@ -20,7 +20,12 @@ namespace MiniEcs.Core
         public readonly Dictionary<uint, EcsEntity> Entities = new Dictionary<uint, EcsEntity>();
         public readonly Dictionary<byte, EcsArchetype> Next = new Dictionary<byte, EcsArchetype>();
         public readonly Dictionary<byte, EcsArchetype> Prior = new Dictionary<byte, EcsArchetype>();
-        
+
+        public bool TryGetEntity(uint id, out EcsEntity entity)
+        {
+            return Entities.TryGetValue(id, out entity);
+        }
+
         public EcsEntity this[uint id] => Entities[id];
         
         public IEnumerator<EcsEntity> GetEnumerator()

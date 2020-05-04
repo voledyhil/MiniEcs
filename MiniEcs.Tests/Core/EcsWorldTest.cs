@@ -169,6 +169,50 @@ namespace MiniEcs.Tests.Core
             Assert.IsTrue(entities.Contains(_entityBD0));
             Assert.IsTrue(entities.Contains(_entityBD1));
         }
+        
+        [TestMethod]
+        public void GroupIncVersionFilterTest()
+        {
+            EcsWorld world = new EcsWorld(ComponentType.TotalComponents);            
+            EcsEntity entity = world.CreateEntity(new ComponentA(), new ComponentB());
+
+            List<EcsEntity> entities = world.Filter(new EcsFilter().AllOf(ComponentType.B)).ToList();
+            Assert.AreEqual(1, entities.Count);
+            
+            entity[ComponentType.C] = new ComponentC();
+            
+            world.CreateEntity(new ComponentC(), new ComponentD());
+            
+            entities = world.Filter(new EcsFilter().AllOf(ComponentType.B)).ToList();
+            Assert.AreEqual(1, entities.Count);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(KeyNotFoundException))]
+        public void GroupGetEntityTest()
+        {
+            EcsWorld world = new EcsWorld(ComponentType.TotalComponents);            
+            EcsEntity entityA = world.CreateEntity(new ComponentA());
+            EcsEntity entityB = world.CreateEntity(new ComponentB());
+            EcsEntity entityAB = world.CreateEntity(new ComponentA(), new ComponentB());
+
+            IEcsGroup group = world.Filter(new EcsFilter().AllOf(ComponentType.A));
+
+            Assert.AreEqual(entityA, group[entityA.Id]);
+            Assert.AreEqual(entityAB, group[entityAB.Id]);
+            Assert.AreEqual(entityB, group[entityB.Id]); //ExpectedException
+        }
+        
+        [TestMethod]
+        public void GetOrCreateSingletonTest()
+        {
+            EcsWorld world = new EcsWorld(ComponentType.TotalComponents);
+
+            ComponentA componentA0 = world.GetOrCreateSingleton<ComponentA>(ComponentType.A);
+            ComponentA componentA1 = world.GetOrCreateSingleton<ComponentA>(ComponentType.A);
+            
+            Assert.AreEqual(componentA0, componentA1);
+        }
 
     }
 }
