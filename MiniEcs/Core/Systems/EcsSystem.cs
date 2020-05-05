@@ -1,6 +1,6 @@
 using System;
 
-namespace MiniEcs.Core
+namespace MiniEcs.Core.Systems
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class EcsUpdateAfterAttribute : Attribute
@@ -12,7 +12,7 @@ namespace MiniEcs.Core
             Type = type;
         }
     }
-    
+
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class EcsUpdateBeforeAttribute : Attribute
     {
@@ -24,8 +24,14 @@ namespace MiniEcs.Core
         }
     }
 
-    public interface IEcsSystem
+    [AttributeUsage(AttributeTargets.Class)]
+    public class EcsUpdateInGroupAttribute : Attribute
     {
-        void Update(float deltaTime, EcsWorld world);
+        public Type Type { get; }
+
+        public EcsUpdateInGroupAttribute(Type type)
+        {
+            Type = type;
+        }
     }
 }

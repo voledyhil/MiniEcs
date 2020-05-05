@@ -7,37 +7,40 @@ namespace MiniEcs.Core
         public HashSet<byte> Any;
         public HashSet<byte> All;
         public HashSet<byte> None;
-        
+
         public EcsFilter AnyOf(params byte[] types)
         {
-            Any = Any ?? new HashSet<byte>(); 
+            Any = Any ?? new HashSet<byte>();
             foreach (byte type in types)
             {
                 Any.Add(type);
                 _isCached = false;
             }
+
             return this;
         }
 
         public EcsFilter AllOf(params byte[] types)
         {
-            All = All ?? new HashSet<byte>(); 
+            All = All ?? new HashSet<byte>();
             foreach (byte type in types)
             {
                 All.Add(type);
                 _isCached = false;
             }
+
             return this;
         }
 
         public EcsFilter NoneOf(params byte[] types)
         {
-            None = None ?? new HashSet<byte>(); 
+            None = None ?? new HashSet<byte>();
             foreach (byte type in types)
             {
                 None.Add(type);
                 _isCached = false;
             }
+
             return this;
         }
 
@@ -56,15 +59,15 @@ namespace MiniEcs.Core
 
             return filter;
         }
-        
-        
-        public override bool Equals(object obj) 
+
+
+        public override bool Equals(object obj)
         {
-            if (obj == null || obj.GetType() != GetType() || obj.GetHashCode() != GetHashCode()) 
+            if (obj == null || obj.GetType() != GetType() || obj.GetHashCode() != GetHashCode())
                 return false;
 
-            EcsFilter filter = (EcsFilter)obj;
-            
+            EcsFilter filter = (EcsFilter) obj;
+
             if (filter.All != null && All != null && !filter.All.SetEquals(All))
                 return false;
 
@@ -80,14 +83,14 @@ namespace MiniEcs.Core
 
         public override int GetHashCode()
         {
-            if (_isCached) 
+            if (_isCached)
                 return _hash;
-            
+
             int hash = GetType().GetHashCode();
             hash = ApplyHash(hash, All, 3, 53);
             hash = ApplyHash(hash, Any, 307, 367);
             hash = ApplyHash(hash, None, 647, 683);
-            
+
             _hash = hash;
             _isCached = true;
 

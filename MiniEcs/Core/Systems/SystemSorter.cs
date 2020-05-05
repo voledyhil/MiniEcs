@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MiniEcs.Core
+namespace MiniEcs.Core.Systems
 {
     public class SystemSorterException : Exception
     {
@@ -10,9 +10,9 @@ namespace MiniEcs.Core
         }
     }
 
-    public class SystemSorter
+    public static class SystemSorter
     {
-        public static void Sort<T>(List<T> systems) where T : IEcsSystem
+        public static void Sort<T>(List<T> systems)
         {
             SystemDependencies<T>[] dependencies = new SystemDependencies<T>[systems.Count];
             Dictionary<Type, int> systemsDict = new Dictionary<Type, int>();
