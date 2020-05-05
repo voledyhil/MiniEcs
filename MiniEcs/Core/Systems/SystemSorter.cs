@@ -5,7 +5,7 @@ namespace MiniEcs.Core.Systems
 {
     public class SystemSorterException : Exception
     {
-        public SystemSorterException(string message)
+        public SystemSorterException(string message) : base(message)
         {
         }
     }

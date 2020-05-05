@@ -6,6 +6,7 @@ namespace MiniEcs.Core
     public interface IEcsArchetype : IEnumerable<EcsEntity>
     {
         EcsEntity this[uint id] { get; }
+        int Count { get; }
     }
     
     public class EcsArchetype : IEcsArchetype
@@ -27,6 +28,7 @@ namespace MiniEcs.Core
         }
 
         public EcsEntity this[uint id] => Entities[id];
+        public int Count => Entities.Count;
         
         public IEnumerator<EcsEntity> GetEnumerator()
         {

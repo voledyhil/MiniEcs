@@ -6,6 +6,7 @@ namespace MiniEcs.Core
     public interface IEcsGroup : IEnumerable<EcsEntity>
     {
         EcsEntity this[uint id] { get; }
+        int CalculateCount();
     }
     
     public class EcsGroup : IEcsGroup
@@ -37,7 +38,17 @@ namespace MiniEcs.Core
                 throw new KeyNotFoundException();
             }
         }
-        
+
+        public int CalculateCount()
+        {
+            int count = 0;
+            foreach (EcsArchetype archetype in _archetypes)
+            {
+                count += archetype.Count;
+            }
+            return count;
+        }
+
         public IEnumerator<EcsEntity> GetEnumerator()
         {
             foreach (EcsArchetype archetype in _archetypes)
