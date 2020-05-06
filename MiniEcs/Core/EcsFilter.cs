@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 
 namespace MiniEcs.Core
 {
-    public class EcsFilter
+    public class EcsFilter : IEquatable<EcsFilter>
     {
         public HashSet<byte> Any;
         public HashSet<byte> All;
@@ -60,23 +61,19 @@ namespace MiniEcs.Core
             return filter;
         }
 
-
-        public override bool Equals(object obj)
+        public bool Equals(EcsFilter other)
         {
-            if (obj == null || obj.GetType() != GetType() || obj.GetHashCode() != GetHashCode())
+            if (other == null || other.GetType() != GetType() || other.GetHashCode() != GetHashCode())
                 return false;
 
-            EcsFilter filter = (EcsFilter) obj;
-
-            if (filter.All != null && All != null && !filter.All.SetEquals(All))
+            if (other.All != null && All != null && !other.All.SetEquals(All))
                 return false;
 
-            if (filter.Any != null && Any != null && !filter.Any.SetEquals(Any))
+            if (other.Any != null && Any != null && !other.Any.SetEquals(Any))
                 return false;
 
-            return filter.None == null || None == null || filter.None.SetEquals(None);
+            return other.None == null || None == null || other.None.SetEquals(None);
         }
-
 
         private int _hash;
         private bool _isCached;
