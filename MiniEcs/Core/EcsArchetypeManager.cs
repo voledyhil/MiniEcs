@@ -63,7 +63,7 @@ namespace MiniEcs.Core
                 {
                     nextArchetype = new EcsArchetype(_archetypeCounter++, indices);
                     nextArchetype.Prior[index] = curArchetype;
-                    foreach (ushort componentType in nextArchetype.IndicesArray)
+                    foreach (ushort componentType in nextArchetype.Indices)
                     {
                         _archetypeIndices[componentType].Add(nextArchetype);
                     }                    
@@ -85,7 +85,7 @@ namespace MiniEcs.Core
             bool added = false;
             int counter = 0;
             byte[] indices = new byte[archetype.IndicesCount + 1];
-            foreach (byte ind in archetype.IndicesArray)
+            foreach (byte ind in archetype.Indices)
             {
                 if (index < ind && !added)
                 {
@@ -107,7 +107,7 @@ namespace MiniEcs.Core
 
             int counter = 0;
             byte[] indices = new byte[archetype.IndicesCount - 1];
-            foreach (byte ind in archetype.IndicesArray)
+            foreach (byte ind in archetype.Indices)
             {
                 if (ind != index)
                     indices[counter++] = ind;

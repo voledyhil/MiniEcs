@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace MiniEcs.Core
 {    
     public class EcsEntity
@@ -26,7 +22,6 @@ namespace MiniEcs.Core
             {
                 this[component.Index] = component;
             }
-
         }
 
         public IEcsComponent this[byte index]
@@ -39,15 +34,15 @@ namespace MiniEcs.Core
                 bool add = component == null && value != null;
                 bool remove = component != null && value == null;
 
-                if (!add && !remove) 
+                if (!add && !remove)
                     return;
 
                 _archetype.Entities.Remove(this);
-                _archetype = add ? 
-                    _archetypeManager.FindOrCreateNextArchetype(_archetype, index) : 
-                    _archetypeManager.FindOrCreatePriorArchetype(_archetype, index);
+                _archetype = add
+                    ? _archetypeManager.FindOrCreateNextArchetype(_archetype, index)
+                    : _archetypeManager.FindOrCreatePriorArchetype(_archetype, index);
                 _archetype.Entities.Add(this);
-                
+
                 _components[index] = value;
             }
         }
