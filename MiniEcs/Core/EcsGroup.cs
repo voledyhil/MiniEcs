@@ -5,7 +5,6 @@ namespace MiniEcs.Core
 {
     public interface IEcsGroup : IEnumerable<EcsEntity>
     {
-        EcsEntity this[uint id] { get; }
         int CalculateCount();
     }
     
@@ -25,34 +24,23 @@ namespace MiniEcs.Core
             Version = newVersion;
             _archetypes.AddRange(newArchetypes);
         }
-        
-        public EcsEntity this[uint id]
-        {
-            get
-            {
-                foreach (EcsArchetype archetype in _archetypes)
-                {
-                    if (archetype.TryGetEntity(id, out EcsEntity entity))
-                        return entity;
-                }
-                throw new KeyNotFoundException();
-            }
-        }
 
         public int CalculateCount()
         {
             int count = 0;
             foreach (EcsArchetype archetype in _archetypes)
             {
-                count += archetype.Count;
+                count += archetype.Entities.Count;
             }
             return count;
         }
 
         public IEnumerator<EcsEntity> GetEnumerator()
         {
-            foreach (EcsArchetype archetype in _archetypes)
+            for (int i = 0; i < _archetypes.Count; i++)
             {
+                EcsArchetype archetype = _archetypes[i];
+                
                 foreach (EcsEntity entity in archetype)
                 {
                     yield return entity;

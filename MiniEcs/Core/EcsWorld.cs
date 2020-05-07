@@ -25,8 +25,7 @@ namespace MiniEcs.Core
 
         public T GetOrCreateSingleton<T>(byte index) where T : class, IEcsComponent, new()
         {
-            IEcsArchetype archetype = GetArchetype(index);
-
+            EcsArchetype archetype = _archetypeManager.FindOrCreateArchetype(index);
             foreach (EcsEntity entity in archetype)
             {
                 return (T) entity[index];
@@ -37,23 +36,23 @@ namespace MiniEcs.Core
             return component;
         }
 
-        public IEcsArchetype GetArchetype(params byte[] indices)
-        {
-            return _archetypeManager.FindOrCreateArchetype(indices);
-        }
-
         private readonly Dictionary<EcsFilter, EcsGroup> _groups = new Dictionary<EcsFilter, EcsGroup>();
         public IEcsGroup Filter(EcsFilter filter)
         {
-            byte[] all = filter.All?.ToArray();
-            byte[] any = filter.Any?.ToArray();
-            byte[] none = filter.None?.ToArray();
-            
             int version = _archetypeManager.ArchetypeCount - 1;
             if (_groups.TryGetValue(filter, out EcsGroup group))
             {
-                if (group.Version < version)
-                    group.IncVersion(version, GetArchetypes(all, any, none, group.Version));
+                if (group.Version >= version) 
+                    return group;
+            }
+            
+            byte[] all = filter.All?.ToArray();
+            byte[] any = filter.Any?.ToArray();
+            byte[] none = filter.None?.ToArray();
+
+            if (group != null)
+            {
+                group.IncVersion(version, GetArchetypes(all, any, none, group.Version));
                 return group;
             }
 

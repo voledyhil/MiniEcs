@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace MiniEcs.Core
-{
+{    
     public class EcsEntity
     {
         public uint Id { get; }
@@ -29,7 +29,7 @@ namespace MiniEcs.Core
             }
 
             _archetype = _archetypeManager.FindOrCreateArchetype(indices);
-            _archetype.Entities.Add(id, this);
+            _archetype.Entities.Add(this);
             _indices = new HashSet<byte>(indices);
         }
 
@@ -71,17 +71,17 @@ namespace MiniEcs.Core
             if (indicesCount == _indices.Count)
                 throw new InvalidOperationException();
 
-            _archetype.Entities.Remove(Id);
+            _archetype.Entities.Remove(this);
 
             if (!edges.TryGetValue(index, out _archetype))
                 _archetype = _archetypeManager.FindOrCreateArchetype(_indices.ToArray());
 
-            _archetype.Entities.Add(Id, this);
+            _archetype.Entities.Add(this);
         }
 
         public void Destroy()
         {
-            _archetype.Entities.Remove(Id);
+            _archetype.Entities.Remove(this);
             _archetype = null;
             _components = null;
             _indices = null;

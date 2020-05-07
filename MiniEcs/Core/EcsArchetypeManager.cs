@@ -46,7 +46,7 @@ namespace MiniEcs.Core
             }
         }
         
-        public EcsArchetype FindOrCreateArchetype(byte[] indices)
+        public EcsArchetype FindOrCreateArchetype(params byte[] indices)
         {
             Array.Sort(indices);
 

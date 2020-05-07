@@ -1,6 +1,7 @@
 using BenchmarkDotNet.Attributes;
 using Entitas;
 using MiniEcs.Core;
+using MiniEcs.Core.Systems;
 using EntitasEntity = Entitas.Entity;
 using EntitasWorld = Entitas.IContext<Entitas.Entity>;
 
@@ -9,116 +10,119 @@ namespace MiniEcs.Benchmark
     [MemoryDiagnoser]
     public class ComponentsForEach
     {
-        private const float Time = 1f / 60f;
-
-
         private EntitasWorld _entitasWorld;
-        private EntitasSystem _entitasSystem;
-
-        private class EntitasSpeed : IComponent
+        public class EntitasComponentA : IComponent
         {
-            public float X;
-            public float Y;
         }
 
-        private class EntitasPosition : IComponent
+        public class EntitasComponentB : IComponent
         {
-            public float X;
-            public float Y;
         }
 
-        public class EntitasSystem : JobSystem<EntitasEntity>
+        public class EntitasComponentC : IComponent
         {
-            public EntitasSystem(EntitasWorld world) : base(world.GetGroup(Matcher<EntitasEntity>.AllOf(0, 1)), 1)
-            {
-            }
-
-            protected override void Execute(EntitasEntity entity)
-            {
-                EntitasSpeed speed = (EntitasSpeed) entity.GetComponent(0);
-                EntitasPosition position = (EntitasPosition) entity.GetComponent(1);
-                position.X += speed.X * Time;
-                position.Y += speed.Y * Time;
-            }
         }
 
-
-        private EcsWorld _miniEcsWorld;
-        private MiniEcsSystem _miniEcsSystem;
-
-        private static readonly byte MiniEcsSpeedType = 0;
-        private static readonly byte MiniEcsPositionType = 1;
-
-        private class MiniEcsSpeed : IEcsComponent
+        public class EntitasComponentD : IComponent
         {
-            public byte Index => MiniEcsSpeedType;
-            public float X;
-            public float Y;
+        }
+        
+
+        private EcsWorld _world;
+        public class ComponentA : IEcsComponent
+        {
+            public byte Index => 0;
         }
 
-        private class MiniEcsPosition : IEcsComponent
+        public class ComponentB : IEcsComponent
         {
-            public byte Index => MiniEcsPositionType;
-            public float X;
-            public float Y;
+            public byte Index => 1;
         }
 
-        private class MiniEcsSystem : IEcsSystem
+        public class ComponentC : IEcsComponent
         {
-            private readonly EcsWorld _world;
-            private EcsFilter _filter;
-
-            public MiniEcsSystem(EcsWorld world)
-            {
-                _world = world;
-                _filter = new EcsFilter().AllOf(MiniEcsSpeedType, MiniEcsPositionType);
-            }
-
-            public void Update(float deltaTime, EcsWorld world)
-            {
-                foreach (EcsEntity entity in _world.Filter(_filter))
-                {
-                    MiniEcsSpeed speed = (MiniEcsSpeed) entity[MiniEcsSpeedType];
-                    MiniEcsPosition position = (MiniEcsPosition) entity[MiniEcsPositionType];
-                    position.X += speed.X * deltaTime;
-                    position.Y += speed.Y * deltaTime;
-                }
-            }
+            public byte Index => 2;
         }
 
+        public class ComponentD : IEcsComponent
+        {
+            public byte Index => 3;
+        }
+        
 
-        [Params(50000)] public int EntityCount;
+        [Params(1000)] public int Iterations;
 
         [GlobalSetup]
         public void Setup()
         {
-            _entitasWorld = new Context<EntitasEntity>(2, () => new EntitasEntity());
-            _entitasSystem = new EntitasSystem(_entitasWorld);
-
-            _miniEcsWorld = new EcsWorld(2);
-            _miniEcsSystem = new MiniEcsSystem(_miniEcsWorld);
-
-            for (int i = 0; i < EntityCount; ++i)
+            _entitasWorld = new Context<EntitasEntity>(4, () => new EntitasEntity());
+            _world = new EcsWorld(4);
+            for (int i = 0; i < Iterations; ++i)
             {
-                EntitasEntity entitasEntity = _entitasWorld.CreateEntity();
-                if (i % 2 == 0)
-                    entitasEntity.AddComponent(0, new EntitasSpeed {X = 42, Y = 42});
-                if (i % 3 == 0)
-                    entitasEntity.AddComponent(1, new EntitasPosition());
+                EntitasEntity entity = _entitasWorld.CreateEntity();
+                entity.AddComponent(0, new EntitasComponentA());
+                entity.AddComponent(1, new EntitasComponentB());
+                entity.AddComponent(3, new EntitasComponentD());
 
-                EcsEntity entity = _miniEcsWorld.CreateEntity();
-                if (i % 2 == 0)
-                    entity[MiniEcsSpeedType] = new MiniEcsSpeed {X = 42, Y = 42};
-                if (i % 3 == 0)
-                    entity[MiniEcsPositionType] = new MiniEcsPosition();
+                entity = _entitasWorld.CreateEntity();
+                entity.AddComponent(0, new EntitasComponentA());
+                entity.AddComponent(2, new EntitasComponentC());
+
+                entity = _entitasWorld.CreateEntity();
+                entity.AddComponent(1, new EntitasComponentB());
+                entity.AddComponent(3, new EntitasComponentD());
+
+                entity = _entitasWorld.CreateEntity();
+                entity.AddComponent(1, new EntitasComponentB());
+                entity.AddComponent(3, new EntitasComponentD());
+
+                entity = _entitasWorld.CreateEntity();
+                entity.AddComponent(1, new EntitasComponentB());
+                entity.AddComponent(2, new EntitasComponentC());
+
+                entity = _entitasWorld.CreateEntity();
+                entity.AddComponent(0, new EntitasComponentA());
+                entity.AddComponent(1, new EntitasComponentB());
+
+                entity = _entitasWorld.CreateEntity();
+                entity.AddComponent(0, new EntitasComponentA());
+                entity.AddComponent(3, new EntitasComponentD());
+
+                _world.CreateEntity(new ComponentA(), new ComponentB(), new ComponentD());
+                _world.CreateEntity(new ComponentA(), new ComponentC());
+                _world.CreateEntity(new ComponentB(), new ComponentD());
+                _world.CreateEntity(new ComponentB(), new ComponentD());
+                _world.CreateEntity(new ComponentB(), new ComponentC());
+                _world.CreateEntity(new ComponentA(), new ComponentB());
+                _world.CreateEntity(new ComponentA(), new ComponentD());
             }
         }
 
         [Benchmark]
-        public void EntitasForEach() => _entitasSystem.Execute();
+        public void EntitasForEach()
+        {
+            EntitasEntity ent = _entitasWorld.CreateEntity();
+            ent.AddComponent(0, new EntitasComponentA());
+            ent.AddComponent(1, new EntitasComponentB());
+            
+            IGroup<Entity> group = _entitasWorld.GetGroup(Matcher<EntitasEntity>.AllOf(1).AnyOf(0, 2).NoneOf(3));
+            foreach (Entity entity in group)
+            {
+                EntitasComponentB comp = (EntitasComponentB) entity.GetComponent(1);
+            }
+        }
 
         [Benchmark]
-        public void MiniEcsForEach() => _miniEcsSystem.Update(Time, _miniEcsWorld);
+        public void MiniEcsForEach()
+        {
+            _world.CreateEntity(new ComponentA(), new ComponentB());
+            
+            IEcsGroup group = _world.Filter(new EcsFilter().AllOf(1).AnyOf(0, 2).NoneOf(3));
+            foreach (EcsEntity entity in group)
+            {
+                ComponentB comp = (ComponentB) entity[1];
+            }
+        }
 
     }
 }

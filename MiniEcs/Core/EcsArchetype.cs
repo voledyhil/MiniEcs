@@ -1,15 +1,22 @@
-using System.Collections;
 using System.Collections.Generic;
 
 namespace MiniEcs.Core
 {
-    public interface IEcsArchetype : IEnumerable<EcsEntity>
+    public class EntityComparer : IEqualityComparer<EcsEntity> 
     {
-        EcsEntity this[uint id] { get; }
-        int Count { get; }
+        public static readonly IEqualityComparer<EcsEntity> Comparer = new EntityComparer();
+        public bool Equals(EcsEntity entityA, EcsEntity entityB) 
+        {
+            return entityA == entityB;
+        }
+
+        public int GetHashCode(EcsEntity entity)
+        {
+            return (int) entity.Id;
+        }
     }
     
-    public class EcsArchetype : IEcsArchetype
+    public class EcsArchetype
     {        
         public int Id { get; }
         public EcsArchetype(int id)
@@ -18,29 +25,13 @@ namespace MiniEcs.Core
         }
         
         public readonly HashSet<byte> Indices = new HashSet<byte>();
-        public readonly Dictionary<uint, EcsEntity> Entities = new Dictionary<uint, EcsEntity>();
+        public readonly HashSet<EcsEntity> Entities = new HashSet<EcsEntity>(EntityComparer.Comparer);
         public readonly Dictionary<byte, EcsArchetype> Next = new Dictionary<byte, EcsArchetype>();
         public readonly Dictionary<byte, EcsArchetype> Prior = new Dictionary<byte, EcsArchetype>();
 
-        public bool TryGetEntity(uint id, out EcsEntity entity)
+        public HashSet<EcsEntity>.Enumerator GetEnumerator() 
         {
-            return Entities.TryGetValue(id, out entity);
-        }
-
-        public EcsEntity this[uint id] => Entities[id];
-        public int Count => Entities.Count;
-        
-        public IEnumerator<EcsEntity> GetEnumerator()
-        {
-            foreach (EcsEntity entity in Entities.Values)
-            {
-                yield return entity;
-            }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+            return Entities.GetEnumerator();
         }
     }
 }

@@ -32,33 +32,6 @@ namespace MiniEcs.Tests.Core
             _entityAD = _world.CreateEntity(new ComponentA(), new ComponentD());
         }
 
-        [TestMethod]
-        public void GetArchetypeTest()
-        {
-            EcsWorld world = new EcsWorld(ComponentType.TotalComponents);
-            
-            EcsEntity entityA = world.CreateEntity(new ComponentA());
-            EcsEntity entityBCA = world.CreateEntity(new ComponentB(), new ComponentC(), new ComponentA());
-
-            world.CreateEntity();
-            world.CreateEntity(new ComponentA(), new ComponentB(), new ComponentC());
-            world.CreateEntity(new ComponentB(), new ComponentC(), new ComponentD());      
-            world.CreateEntity(new ComponentB(), new ComponentC());
-
-            Assert.AreEqual(1, world.GetArchetype().ToArray().Length);
-            Assert.AreEqual(1, world.GetArchetype(ComponentType.A).ToArray().Length);           
-            Assert.AreEqual(0, world.GetArchetype(ComponentType.B).ToArray().Length);     
-            Assert.AreEqual(1, world.GetArchetype(ComponentType.B, ComponentType.C).ToArray().Length);
-            Assert.AreEqual(0, world.GetArchetype(ComponentType.C, ComponentType.D).ToArray().Length);
-            Assert.AreEqual(2, world.GetArchetype(ComponentType.A, ComponentType.B, ComponentType.C).ToArray().Length);
-            Assert.AreEqual(1, world.GetArchetype(ComponentType.B, ComponentType.C, ComponentType.D).ToArray().Length);   
-            
-            entityBCA.Destroy();
-            entityA.Destroy();
-            
-            Assert.AreEqual(0, world.GetArchetype(ComponentType.A).ToArray().Length); 
-            Assert.AreEqual(1, world.GetArchetype(ComponentType.A, ComponentType.B, ComponentType.C).ToArray().Length);
-        }
 
         [TestMethod]
         public void GetSetRemoveComponentTest()
@@ -187,21 +160,6 @@ namespace MiniEcs.Tests.Core
             Assert.AreEqual(1, entities.Count);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(KeyNotFoundException))]
-        public void GroupGetEntityTest()
-        {
-            EcsWorld world = new EcsWorld(ComponentType.TotalComponents);            
-            EcsEntity entityA = world.CreateEntity(new ComponentA());
-            EcsEntity entityB = world.CreateEntity(new ComponentB());
-            EcsEntity entityAB = world.CreateEntity(new ComponentA(), new ComponentB());
-
-            IEcsGroup group = world.Filter(new EcsFilter().AllOf(ComponentType.A));
-
-            Assert.AreEqual(entityA, group[entityA.Id]);
-            Assert.AreEqual(entityAB, group[entityAB.Id]);
-            Assert.AreEqual(entityB, group[entityB.Id]); //ExpectedException
-        }
         
         [TestMethod]
         public void GetOrCreateSingletonTest()
