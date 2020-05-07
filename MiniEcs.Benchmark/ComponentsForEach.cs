@@ -50,7 +50,7 @@ namespace MiniEcs.Benchmark
         }
         
 
-        [Params(1000)] public int Iterations;
+        [Params(1000, 10000)] public int Iterations;
 
         [GlobalSetup]
         public void Setup()
@@ -101,27 +101,74 @@ namespace MiniEcs.Benchmark
         [Benchmark]
         public void EntitasForEach()
         {
-            EntitasEntity ent = _entitasWorld.CreateEntity();
-            ent.AddComponent(0, new EntitasComponentA());
-            ent.AddComponent(1, new EntitasComponentB());
+            EntitasEntity entityABD = _entitasWorld.CreateEntity();
+            entityABD.AddComponent(0, new EntitasComponentA());
+            entityABD.AddComponent(1, new EntitasComponentB());
+            entityABD.AddComponent(3, new EntitasComponentD());
+
+            EntitasEntity entityAC = _entitasWorld.CreateEntity();
+            entityAC.AddComponent(0, new EntitasComponentA());
+            entityAC.AddComponent(2, new EntitasComponentC());
+
+            EntitasEntity entityBD0 = _entitasWorld.CreateEntity();
+            entityBD0.AddComponent(1, new EntitasComponentB());
+            entityBD0.AddComponent(3, new EntitasComponentD());
+
+            EntitasEntity entityBD1  = _entitasWorld.CreateEntity();
+            entityBD1.AddComponent(1, new EntitasComponentB());
+            entityBD1.AddComponent(3, new EntitasComponentD());
+
+            EntitasEntity entityBC = _entitasWorld.CreateEntity();
+            entityBC.AddComponent(1, new EntitasComponentB());
+            entityBC.AddComponent(2, new EntitasComponentC());
+
+            EntitasEntity entityAB = _entitasWorld.CreateEntity();
+            entityAB.AddComponent(0, new EntitasComponentA());
+            entityAB.AddComponent(1, new EntitasComponentB());
+
+            EntitasEntity entityAD = _entitasWorld.CreateEntity();
+            entityAD.AddComponent(0, new EntitasComponentA());
+            entityAD.AddComponent(3, new EntitasComponentD());
             
             IGroup<Entity> group = _entitasWorld.GetGroup(Matcher<EntitasEntity>.AllOf(1).AnyOf(0, 2).NoneOf(3));
             foreach (Entity entity in group)
             {
                 EntitasComponentB comp = (EntitasComponentB) entity.GetComponent(1);
             }
+            
+            entityABD.Destroy();
+            entityAC.Destroy();
+            entityBD0.Destroy();
+            entityBD1.Destroy();
+            entityBC.Destroy();
+            entityAB.Destroy();
+            entityAD.Destroy();
         }
 
         [Benchmark]
         public void MiniEcsForEach()
         {
-            _world.CreateEntity(new ComponentA(), new ComponentB());
+            EcsEntity entityABD = _world.CreateEntity(new ComponentA(), new ComponentB(), new ComponentD());
+            EcsEntity entityAC = _world.CreateEntity(new ComponentA(), new ComponentC());
+            EcsEntity entityBD0 = _world.CreateEntity(new ComponentB(), new ComponentD());
+            EcsEntity entityBD1 = _world.CreateEntity(new ComponentB(), new ComponentD());
+            EcsEntity entityBC = _world.CreateEntity(new ComponentB(), new ComponentC());
+            EcsEntity entityAB = _world.CreateEntity(new ComponentA(), new ComponentB());
+            EcsEntity entityAD = _world.CreateEntity(new ComponentA(), new ComponentD());
             
             IEcsGroup group = _world.Filter(new EcsFilter().AllOf(1).AnyOf(0, 2).NoneOf(3));
             foreach (EcsEntity entity in group)
             {
                 ComponentB comp = (ComponentB) entity[1];
             }
+            
+            entityABD.Destroy();
+            entityAC.Destroy();
+            entityBD0.Destroy();
+            entityBD1.Destroy();
+            entityBC.Destroy();
+            entityAB.Destroy();
+            entityAD.Destroy();
         }
 
     }

@@ -6,10 +6,11 @@ namespace MiniEcs.Core
 {
     public class EcsWorld
     {
-        private uint _entityCounter = 0;
-        
-        private readonly EcsArchetypeManager _archetypeManager;
 
+        public int ArchetypeCount => _archetypeManager.ArchetypeCount;
+        
+        private uint _entityCounter = 0;
+        private readonly EcsArchetypeManager _archetypeManager;
         private readonly int _capacity;
 
         public EcsWorld(byte capacity)

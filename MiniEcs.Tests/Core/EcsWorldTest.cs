@@ -24,12 +24,35 @@ namespace MiniEcs.Tests.Core
             _world = new EcsWorld(ComponentType.TotalComponents);
 
             _entityABD = _world.CreateEntity(new ComponentA(), new ComponentB(), new ComponentD());
-            _entityAC = _world.CreateEntity(new ComponentA(), new ComponentC());      
-            _entityBD0 = _world.CreateEntity(new ComponentB(), new ComponentD());     
-            _entityBD1 = _world.CreateEntity(new ComponentB(),new ComponentD());
-            _entityBC = _world.CreateEntity(new ComponentB(), new ComponentC());
-            _entityAB = _world.CreateEntity(new ComponentA(), new ComponentB());
+            _entityAC = _world.CreateEntity(new ComponentA(), new ComponentC());
+            _entityBD0 = _world.CreateEntity(new ComponentB(), new ComponentD());
+            _entityBD1 = _world.CreateEntity(new ComponentD(), new ComponentB());
+            _entityBC = _world.CreateEntity(new ComponentC(), new ComponentB());
+            _entityAB = _world.CreateEntity(new ComponentB(), new ComponentA());
             _entityAD = _world.CreateEntity(new ComponentA(), new ComponentD());
+
+        }
+
+        [TestMethod]
+        public void ArchetypeCountTest()
+        {            
+            /*
+             *  Archetypes
+             *  ----------
+             *  1.  Empty
+             *  2.  A
+             *  3.  AB
+             *  4.  ABD
+             *  5.  AC
+             *  6.  B
+             *  7.  BD
+             *  8.  D
+             *  9.  C
+             *  10. CB
+             *  11. AD
+             */
+            
+            Assert.AreEqual(11, _world.ArchetypeCount);
         }
 
 
@@ -71,6 +94,7 @@ namespace MiniEcs.Tests.Core
             Assert.IsTrue(entities.Contains(_entityABD));
             Assert.IsTrue(entities.Contains(_entityBD0));
             Assert.IsTrue(entities.Contains(_entityBD1));
+            
         }
 
         [TestMethod]

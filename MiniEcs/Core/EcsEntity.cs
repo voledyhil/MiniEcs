@@ -11,26 +11,22 @@ namespace MiniEcs.Core
         private EcsArchetype _archetype;
         private EcsArchetypeManager _archetypeManager;
         private IEcsComponent[] _components;
-        private HashSet<byte> _indices;
 
         public EcsEntity(uint id, EcsArchetypeManager archetypeManager, int capacity, params IEcsComponent[] components)
         {
             Id = id;
-            
+        
+            _components = new IEcsComponent[capacity];            
             _archetypeManager = archetypeManager;
-            _components = new IEcsComponent[capacity];
-
-            byte[] indices = new byte[components.Length];
-            for (int i = 0; i < components.Length; i++)
+            
+            _archetype = _archetypeManager.Root;
+            _archetype.Entities.Add(this);
+        
+            foreach (IEcsComponent component in components)
             {
-                IEcsComponent component = components[i];
-                _components[component.Index] = component;
-                indices[i] = component.Index;
+                this[component.Index] = component;
             }
 
-            _archetype = _archetypeManager.FindOrCreateArchetype(indices);
-            _archetype.Entities.Add(this);
-            _indices = new HashSet<byte>(indices);
         }
 
         public IEcsComponent this[byte index]
@@ -46,37 +42,14 @@ namespace MiniEcs.Core
                 if (!add && !remove) 
                     return;
 
-                ChangeArchetype(index, add);
+                _archetype.Entities.Remove(this);
+                _archetype = add ? 
+                    _archetypeManager.FindOrCreateNextArchetype(_archetype, index) : 
+                    _archetypeManager.FindOrCreatePriorArchetype(_archetype, index);
+                _archetype.Entities.Add(this);
                 
                 _components[index] = value;
             }
-        }
-
-        private void ChangeArchetype(byte index, bool inc)
-        {
-            int indicesCount = _indices.Count;
-            IDictionary<byte, EcsArchetype> edges;
-            
-            if (inc)
-            {
-                _indices.Add(index);
-                edges = _archetype.Next;
-            }
-            else
-            {
-                _indices.Remove(index);
-                edges = _archetype.Prior;
-            }
-
-            if (indicesCount == _indices.Count)
-                throw new InvalidOperationException();
-
-            _archetype.Entities.Remove(this);
-
-            if (!edges.TryGetValue(index, out _archetype))
-                _archetype = _archetypeManager.FindOrCreateArchetype(_indices.ToArray());
-
-            _archetype.Entities.Add(this);
         }
 
         public void Destroy()
@@ -84,7 +57,6 @@ namespace MiniEcs.Core
             _archetype.Entities.Remove(this);
             _archetype = null;
             _components = null;
-            _indices = null;
             _archetypeManager = null;
         }
        

@@ -6,6 +6,7 @@ namespace MiniEcs.Core
     public class EcsArchetypeManager
     {
         public int ArchetypeCount => _archetypes.Count;
+        public EcsArchetype Root => _rootArchetype;
 
         private int _archetypeCounter;
         private readonly EcsArchetype _rootArchetype;
@@ -14,7 +15,7 @@ namespace MiniEcs.Core
         
         public EcsArchetypeManager(byte capacity)
         {
-            _rootArchetype = new EcsArchetype(_archetypeCounter++);
+            _rootArchetype = new EcsArchetype(_archetypeCounter++, new byte[] { });
             _archetypes = new List<EcsArchetype>(2 * capacity) {_rootArchetype};
             _archetypeIndices = new List<EcsArchetype>[capacity];
             
@@ -50,30 +51,68 @@ namespace MiniEcs.Core
         {
             Array.Sort(indices);
 
+            return InnerFindOrCreateArchetype(indices);
+        }
+
+        private EcsArchetype InnerFindOrCreateArchetype(byte[] indices)
+        {
             EcsArchetype curArchetype = _rootArchetype;
             foreach (byte index in indices)
             {
                 if (!curArchetype.Next.TryGetValue(index, out EcsArchetype nextArchetype))
                 {
-                    nextArchetype = new EcsArchetype(_archetypeCounter++);
-                    nextArchetype.Indices.UnionWith(curArchetype.Indices);
-                    nextArchetype.Indices.Add(index);
+                    nextArchetype = new EcsArchetype(_archetypeCounter++, indices);
                     nextArchetype.Prior[index] = curArchetype;
-
-                    foreach (ushort componentType in nextArchetype.Indices)
+                    foreach (ushort componentType in nextArchetype.IndicesArray)
                     {
                         _archetypeIndices[componentType].Add(nextArchetype);
-                    }
-                   
-                    _archetypes.Add(nextArchetype);
-
+                    }                    
                     curArchetype.Next[index] = nextArchetype;
+                    
+                    _archetypes.Add(nextArchetype);
                 }
-
                 curArchetype = nextArchetype;
             }
 
             return curArchetype;
+        }
+
+        public EcsArchetype FindOrCreateNextArchetype(EcsArchetype archetype, byte index)
+        {
+            if (archetype.Next.TryGetValue(index, out EcsArchetype nextArchetype))
+                return nextArchetype;
+
+            bool added = false;
+            int counter = 0;
+            byte[] indices = new byte[archetype.IndicesCount + 1];
+            foreach (byte ind in archetype.IndicesArray)
+            {
+                if (index < ind && !added)
+                {
+                    indices[counter++] = index;
+                    added = true;
+                }
+                indices[counter++] = ind;
+            }
+            if (!added)
+                indices[counter] = index;
+            
+            return InnerFindOrCreateArchetype(indices);
+        }
+        
+        public EcsArchetype FindOrCreatePriorArchetype(EcsArchetype archetype, byte index)
+        {
+            if (archetype.Prior.TryGetValue(index, out EcsArchetype priorArchetype))
+                return priorArchetype;
+
+            int counter = 0;
+            byte[] indices = new byte[archetype.IndicesCount - 1];
+            foreach (byte ind in archetype.IndicesArray)
+            {
+                if (ind != index)
+                    indices[counter++] = ind;
+            }
+            return InnerFindOrCreateArchetype(indices);
         }
     }
 }
