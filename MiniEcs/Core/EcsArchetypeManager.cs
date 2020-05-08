@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace MiniEcs.Core
 {
@@ -25,6 +26,7 @@ namespace MiniEcs.Core
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<EcsArchetype> GetArchetypes(int startId)
         {
             for (int i = startId; i < _archetypes.Count; i++)
@@ -33,6 +35,7 @@ namespace MiniEcs.Core
             }
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<EcsArchetype> GetArchetypes(byte index, int startId)
         {
             List<EcsArchetype> archetypes = _archetypeIndices[index];
@@ -54,6 +57,7 @@ namespace MiniEcs.Core
             return InnerFindOrCreateArchetype(indices);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private EcsArchetype InnerFindOrCreateArchetype(byte[] indices)
         {
             EcsArchetype curArchetype = _emptyArchetype;
@@ -84,6 +88,7 @@ namespace MiniEcs.Core
             return curArchetype;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EcsArchetype FindOrCreateNextArchetype(EcsArchetype archetype, byte addIndex)
         {
             if (archetype.Next.TryGetValue(addIndex, out EcsArchetype nextArchetype))
@@ -107,6 +112,7 @@ namespace MiniEcs.Core
             return InnerFindOrCreateArchetype(indices);
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EcsArchetype FindOrCreatePriorArchetype(EcsArchetype archetype, byte removeIndex)
         {
             if (archetype.Prior.TryGetValue(removeIndex, out EcsArchetype priorArchetype))

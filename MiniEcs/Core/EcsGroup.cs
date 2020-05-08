@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace MiniEcs.Core
 {
@@ -25,6 +26,7 @@ namespace MiniEcs.Core
             _archetypes.AddRange(newArchetypes);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int CalculateCount()
         {
             int count = 0;
@@ -35,6 +37,7 @@ namespace MiniEcs.Core
             return count;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerator<EcsEntity> GetEnumerator()
         {
             for (int i = 0; i < _archetypes.Count; i++)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace MiniEcs.Core
 {
@@ -61,6 +62,7 @@ namespace MiniEcs.Core
             return group;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private IEnumerable<EcsArchetype> GetArchetypes(byte[] all, byte[] any, byte[] none, int startId)
         {
             HashSet<EcsArchetype> buffer0 = null;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace MiniEcs.Core
 {
@@ -94,6 +95,7 @@ namespace MiniEcs.Core
             return _hash;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int ApplyHash(int hash, HashSet<byte> indices, int i1, int i2)
         {
             if (indices == null)
