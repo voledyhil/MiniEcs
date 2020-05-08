@@ -15,7 +15,7 @@ namespace MiniEcs.Core
             _components = new IEcsComponent[capacity];            
             _archetypeManager = archetypeManager;
             
-            _archetype = _archetypeManager.Root;
+            _archetype = _archetypeManager.Empty;
             _archetype.Entities.Add(this);
         
             foreach (IEcsComponent component in components)

@@ -6,17 +6,16 @@ namespace MiniEcs.Core
     public class EcsArchetypeManager
     {
         public int ArchetypeCount => _archetypes.Count;
-        public EcsArchetype Root => _rootArchetype;
+        public EcsArchetype Empty => _emptyArchetype;
 
-        private int _archetypeCounter;
-        private readonly EcsArchetype _rootArchetype;
+        private readonly EcsArchetype _emptyArchetype;
         private readonly List<EcsArchetype> _archetypes;
         private readonly List<EcsArchetype>[] _archetypeIndices;
         
         public EcsArchetypeManager(byte capacity)
         {
-            _rootArchetype = new EcsArchetype(_archetypeCounter++, new byte[] { });
-            _archetypes = new List<EcsArchetype>(2 * capacity) {_rootArchetype};
+            _emptyArchetype = new EcsArchetype(new byte[] { });
+            _archetypes = new List<EcsArchetype>(2 * capacity) {_emptyArchetype};
             _archetypeIndices = new List<EcsArchetype>[capacity];
             
             for (int i = 0; i < capacity; i++)
@@ -39,11 +38,10 @@ namespace MiniEcs.Core
             
             for (int i = archetypes.Count - 1; i >= 0; i--)
             {
-                EcsArchetype archetype = archetypes[i];
-                if (archetype.Id <= startId)
+                if (i <= startId)
                     break;
-
-                yield return archetype;
+                
+                yield return archetypes[i];
             }
         }
         
@@ -56,7 +54,7 @@ namespace MiniEcs.Core
 
         private EcsArchetype InnerFindOrCreateArchetype(byte[] indices)
         {
-            EcsArchetype curArchetype = _rootArchetype;
+            EcsArchetype curArchetype = _emptyArchetype;
             for (int i = 0; i < indices.Length; i++)
             {
                 byte index = indices[i];
@@ -66,7 +64,7 @@ namespace MiniEcs.Core
                     for (int j = 0; j < archetypeIndices.Length; j++)
                         archetypeIndices[j] = indices[j];
                     
-                    nextArchetype = new EcsArchetype(_archetypeCounter++, archetypeIndices);
+                    nextArchetype = new EcsArchetype(archetypeIndices);
                     nextArchetype.Prior[index] = curArchetype;
                     foreach (ushort componentType in nextArchetype.Indices)
                     {
@@ -84,40 +82,40 @@ namespace MiniEcs.Core
             return curArchetype;
         }
 
-        public EcsArchetype FindOrCreateNextArchetype(EcsArchetype archetype, byte index)
+        public EcsArchetype FindOrCreateNextArchetype(EcsArchetype archetype, byte addIndex)
         {
-            if (archetype.Next.TryGetValue(index, out EcsArchetype nextArchetype))
+            if (archetype.Next.TryGetValue(addIndex, out EcsArchetype nextArchetype))
                 return nextArchetype;
 
             bool added = false;
-            int counter = 0;
+            int length = 0;
             byte[] indices = new byte[archetype.IndicesCount + 1];
-            foreach (byte ind in archetype.Indices)
+            foreach (byte index in archetype.Indices)
             {
-                if (index < ind && !added)
+                if (addIndex < index && !added)
                 {
-                    indices[counter++] = index;
+                    indices[length++] = addIndex;
                     added = true;
                 }
-                indices[counter++] = ind;
+                indices[length++] = index;
             }
             if (!added)
-                indices[counter] = index;
+                indices[length] = addIndex;
             
             return InnerFindOrCreateArchetype(indices);
         }
         
-        public EcsArchetype FindOrCreatePriorArchetype(EcsArchetype archetype, byte index)
+        public EcsArchetype FindOrCreatePriorArchetype(EcsArchetype archetype, byte removeIndex)
         {
-            if (archetype.Prior.TryGetValue(index, out EcsArchetype priorArchetype))
+            if (archetype.Prior.TryGetValue(removeIndex, out EcsArchetype priorArchetype))
                 return priorArchetype;
 
-            int counter = 0;
+            int length = 0;
             byte[] indices = new byte[archetype.IndicesCount - 1];
-            foreach (byte ind in archetype.Indices)
+            foreach (byte index in archetype.Indices)
             {
-                if (ind != index)
-                    indices[counter++] = ind;
+                if (index != removeIndex)
+                    indices[length++] = index;
             }
             return InnerFindOrCreateArchetype(indices);
         }

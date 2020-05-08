@@ -18,12 +18,10 @@ namespace MiniEcs.Core
     
     public class EcsArchetype
     {
-        public int Id { get; }
         public int IndicesCount => Indices.Length;
 
-        public EcsArchetype(int id, byte[] indices)
+        public EcsArchetype(byte[] indices)
         {
-            Id = id;
             Indices = indices;
         }
         
