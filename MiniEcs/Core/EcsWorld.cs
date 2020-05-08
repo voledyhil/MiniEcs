@@ -6,12 +6,12 @@ namespace MiniEcs.Core
 {
     public class EcsWorld
     {
-
         public int ArchetypeCount => _archetypeManager.ArchetypeCount;
         
         private uint _entityCounter = 0;
-        private readonly EcsArchetypeManager _archetypeManager;
         private readonly int _capacity;
+        private readonly EcsArchetypeManager _archetypeManager;
+        private readonly Dictionary<EcsFilter, EcsGroup> _groups = new Dictionary<EcsFilter, EcsGroup>();
 
         public EcsWorld(byte capacity)
         {
@@ -37,7 +37,6 @@ namespace MiniEcs.Core
             return component;
         }
 
-        private readonly Dictionary<EcsFilter, EcsGroup> _groups = new Dictionary<EcsFilter, EcsGroup>();
         public IEcsGroup Filter(EcsFilter filter)
         {
             int version = _archetypeManager.ArchetypeCount - 1;
