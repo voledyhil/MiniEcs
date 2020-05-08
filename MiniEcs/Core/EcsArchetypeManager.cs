@@ -40,7 +40,7 @@ namespace MiniEcs.Core
             for (int i = archetypes.Count - 1; i >= 0; i--)
             {
                 EcsArchetype archetype = archetypes[i];
-                if (archetype.Id < startId)
+                if (archetype.Id <= startId)
                     break;
 
                 yield return archetype;
