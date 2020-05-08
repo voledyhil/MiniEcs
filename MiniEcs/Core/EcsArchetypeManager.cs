@@ -57,20 +57,27 @@ namespace MiniEcs.Core
         private EcsArchetype InnerFindOrCreateArchetype(byte[] indices)
         {
             EcsArchetype curArchetype = _rootArchetype;
-            foreach (byte index in indices)
+            for (int i = 0; i < indices.Length; i++)
             {
+                byte index = indices[i];
                 if (!curArchetype.Next.TryGetValue(index, out EcsArchetype nextArchetype))
                 {
-                    nextArchetype = new EcsArchetype(_archetypeCounter++, indices);
+                    byte[] archetypeIndices = new byte[i + 1];
+                    for (int j = 0; j < archetypeIndices.Length; j++)
+                        archetypeIndices[j] = indices[j];
+                    
+                    nextArchetype = new EcsArchetype(_archetypeCounter++, archetypeIndices);
                     nextArchetype.Prior[index] = curArchetype;
                     foreach (ushort componentType in nextArchetype.Indices)
                     {
                         _archetypeIndices[componentType].Add(nextArchetype);
-                    }                    
+                    }
+
                     curArchetype.Next[index] = nextArchetype;
-                    
+
                     _archetypes.Add(nextArchetype);
                 }
+
                 curArchetype = nextArchetype;
             }
 
