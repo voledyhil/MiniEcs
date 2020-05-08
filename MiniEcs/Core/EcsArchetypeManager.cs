@@ -8,13 +8,14 @@ namespace MiniEcs.Core
         public int ArchetypeCount => _archetypes.Count;
         public EcsArchetype Empty => _emptyArchetype;
 
+        private int _archetypeIdCounter;
         private readonly EcsArchetype _emptyArchetype;
         private readonly List<EcsArchetype> _archetypes;
         private readonly List<EcsArchetype>[] _archetypeIndices;
         
         public EcsArchetypeManager(byte capacity)
         {
-            _emptyArchetype = new EcsArchetype(new byte[] { });
+            _emptyArchetype = new EcsArchetype(_archetypeIdCounter++, new byte[] { });
             _archetypes = new List<EcsArchetype>(2 * capacity) {_emptyArchetype};
             _archetypeIndices = new List<EcsArchetype>[capacity];
             
@@ -38,10 +39,11 @@ namespace MiniEcs.Core
             
             for (int i = archetypes.Count - 1; i >= 0; i--)
             {
-                if (i <= startId)
+                EcsArchetype archetype = archetypes[i];
+                if (archetype.Id <= startId)
                     break;
                 
-                yield return archetypes[i];
+                yield return archetype;
             }
         }
         
@@ -64,7 +66,7 @@ namespace MiniEcs.Core
                     for (int j = 0; j < archetypeIndices.Length; j++)
                         archetypeIndices[j] = indices[j];
                     
-                    nextArchetype = new EcsArchetype(archetypeIndices);
+                    nextArchetype = new EcsArchetype(_archetypeIdCounter++, archetypeIndices);
                     nextArchetype.Prior[index] = curArchetype;
                     foreach (ushort componentType in nextArchetype.Indices)
                     {

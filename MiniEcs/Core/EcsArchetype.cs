@@ -18,13 +18,15 @@ namespace MiniEcs.Core
     
     public class EcsArchetype
     {
+        public int Id { get; }
         public int IndicesCount => Indices.Length;
 
-        public EcsArchetype(byte[] indices)
+        public EcsArchetype(int id, byte[] indices)
         {
+            Id = id;
             Indices = indices;
         }
-        
+
         public readonly byte[] Indices;
         public readonly HashSet<EcsEntity> Entities = new HashSet<EcsEntity>(EntityComparer.Comparer);
         public readonly Dictionary<byte, EcsArchetype> Next = new Dictionary<byte, EcsArchetype>();
