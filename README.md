@@ -189,6 +189,7 @@ Intel Core i7-8850H CPU 2.60GHz (Coffee Lake), 1 CPU, 12 logical and 6 physical 
 - Caching Destroyed Entities
 - Extending EcsWorld, EcsEntity, and EcsSystem Interfaces
 - Transition from AoS (array of structures) to SoA (struct of arrays) PERFORMANCE!
+- Binary serialization, deserialization, div compression
 
 
 ## References
