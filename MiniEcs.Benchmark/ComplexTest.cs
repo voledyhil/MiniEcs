@@ -48,9 +48,6 @@ namespace MiniEcs.Benchmark
             public byte Index => 3;
         }
         
-
-        [Params(0, 100, 1000)] public int InitIterations;
-
         private EntitasWorld _entitasWorld;
         private EcsWorld _world;
         
@@ -59,7 +56,7 @@ namespace MiniEcs.Benchmark
         {
             _entitasWorld = new Context<EntitasEntity>(4, () => new EntitasEntity());
             _world = new EcsWorld(4);
-            for (int i = 0; i < InitIterations; ++i)
+            for (int i = 0; i < 10000; ++i)
             {
                 EntitasEntity entity = _entitasWorld.CreateEntity();
                 entity.AddComponent(0, new EntitasComponentA());
@@ -101,11 +98,11 @@ namespace MiniEcs.Benchmark
         }
 
         [Benchmark]
-        public void EntitasComplexTest()
+        public void EntitasStressTest()
         {
             List<EntitasEntity> entities = new List<EntitasEntity>();
 
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 EntitasEntity entityABD = _entitasWorld.CreateEntity();
                 entityABD.AddComponent(0, new EntitasComponentA());
@@ -172,11 +169,11 @@ namespace MiniEcs.Benchmark
         }
 
         [Benchmark]
-        public void MiniEcsComplexTest()
+        public void MiniEcsStressTest()
         {
             List<EcsEntity> entities = new List<EcsEntity>();
 
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 EcsEntity entityABD = _world.CreateEntity(new MiniEcsComponentA(), new MiniEcsComponentB(), new MiniEcsComponentD());
                 EcsEntity entityAC = _world.CreateEntity(new MiniEcsComponentA(), new MiniEcsComponentC());
