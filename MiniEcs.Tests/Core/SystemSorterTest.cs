@@ -131,7 +131,7 @@ namespace MiniEcs.Tests.Core
             Assert.AreEqual(systemE, systems[4]);
             Assert.AreEqual(systemC, systems[5]);
 
-            SystemSorter.Sort(new List<IEcsSystem> {new SystemF(), new SystemG()}); //ExpectedException
+            EcsSystemSorter.Sort(new List<IEcsSystem> {new SystemF(), new SystemG()}); //ExpectedException
         }
 
     }

@@ -1,15 +1,26 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace MiniEcs.Core
 {
+    /// <summary>
+    /// Query defines the set of component types that an archetype must contain in
+    /// order for its entities to be included in the view.
+    /// You can also exclude archetypes that contain specific types of components.
+    /// </summary>
     public class EcsFilter : IEquatable<EcsFilter>
     {
         public HashSet<byte> Any;
         public HashSet<byte> All;
         public HashSet<byte> None;
 
+        /// <summary>
+        /// At least one of the component types in this array must exist in the archetype
+        /// </summary>
+        /// <param name="types">Combinations of component types</param>
+        /// <returns>Current filter</returns>
         public EcsFilter AnyOf(params byte[] types)
         {
             Any = Any ?? new HashSet<byte>();
@@ -22,6 +33,11 @@ namespace MiniEcs.Core
             return this;
         }
 
+        /// <summary>
+        /// All component types in this array must exist in the archetype
+        /// </summary>
+        /// <param name="types">Combinations of component types</param>
+        /// <returns>Current filter</returns>
         public EcsFilter AllOf(params byte[] types)
         {
             All = All ?? new HashSet<byte>();
@@ -34,6 +50,11 @@ namespace MiniEcs.Core
             return this;
         }
 
+        /// <summary>
+        /// None of the component types in this array can exist in the archetype
+        /// </summary>
+        /// <param name="types">Combinations of component types</param>
+        /// <returns>Current filter</returns>
         public EcsFilter NoneOf(params byte[] types)
         {
             None = None ?? new HashSet<byte>();
@@ -46,6 +67,10 @@ namespace MiniEcs.Core
             return this;
         }
 
+        /// <summary>
+        /// Creates a new filter with the same set of parameters
+        /// </summary>
+        /// <returns>New Filter</returns>
         public EcsFilter Clone()
         {
             EcsFilter filter = new EcsFilter();
@@ -79,15 +104,19 @@ namespace MiniEcs.Core
         private int _hash;
         private bool _isCached;
 
+        /// <summary>
+        /// Сalculate a filter hash based on a set of components, for faster filter comparison
+        /// </summary>
+        /// <returns>Hash</returns>
         public override int GetHashCode()
         {
             if (_isCached)
                 return _hash;
 
             int hash = GetType().GetHashCode();
-            hash = ApplyHash(hash, All, 3, 53);
-            hash = ApplyHash(hash, Any, 307, 367);
-            hash = ApplyHash(hash, None, 647, 683);
+            hash = CalculateHash(hash, All, 3, 53);
+            hash = CalculateHash(hash, Any, 307, 367);
+            hash = CalculateHash(hash, None, 647, 683);
 
             _hash = hash;
             _isCached = true;
@@ -96,16 +125,15 @@ namespace MiniEcs.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int ApplyHash(int hash, HashSet<byte> indices, int i1, int i2)
+        private static int CalculateHash(int hash, HashSet<byte> indices, int i1, int i2)
         {
             if (indices == null)
                 return hash;
 
-            foreach (byte index in indices)
-            {
-                hash ^= index * i1;
-            }
+            byte[] indicesArray = indices.ToArray();
+            Array.Sort(indicesArray);
 
+            hash = indicesArray.Aggregate(hash, (current, index) => current ^ index * i1);
             hash ^= indices.Count * i2;
             return hash;
         }

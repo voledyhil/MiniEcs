@@ -4,16 +4,43 @@ using System.Runtime.CompilerServices;
 
 namespace MiniEcs.Core
 {
+    /// <summary>
+    /// Manager of all archetypes.
+    /// Carries out the creation of new archetypes,
+    /// and searches for existing archetypes
+    /// </summary>
     public class EcsArchetypeManager
     {
+        /// <summary>
+        /// Number of existing archetypes
+        /// </summary>
         public int ArchetypeCount => _archetypes.Count;
+        /// <summary>
+        /// Returns the first empty archetype
+        /// </summary>
         public EcsArchetype Empty => _emptyArchetype;
 
+        /// <summary>
+        /// Archetype unique identifier generator
+        /// </summary>
         private int _archetypeIdCounter;
+        /// <summary>
+        /// First empty archetype
+        /// </summary>
         private readonly EcsArchetype _emptyArchetype;
+        /// <summary>
+        /// List of all archetypes created
+        /// </summary>
         private readonly List<EcsArchetype> _archetypes;
+        /// <summary>
+        /// List of all archetypes corresponding to each type of component
+        /// </summary>
         private readonly List<EcsArchetype>[] _archetypeIndices;
         
+        /// <summary>
+        /// Creates an archetype manager
+        /// </summary>
+        /// <param name="capacity">number of all possible component types</param>
         public EcsArchetypeManager(byte capacity)
         {
             _emptyArchetype = new EcsArchetype(_archetypeIdCounter++, new byte[] { });
@@ -26,6 +53,12 @@ namespace MiniEcs.Core
             }
         }
 
+        /// <summary>
+        /// Gets the enumerator of all archetypes whose identifier
+        /// is greater than or equal to startId
+        /// </summary>
+        /// <param name="startId">Archetype start id</param>
+        /// <returns>Archetype enumerator</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<EcsArchetype> GetArchetypes(int startId)
         {
@@ -35,6 +68,13 @@ namespace MiniEcs.Core
             }
         }
         
+        /// <summary>
+        /// Gets an enumerator of all archetypes that have the specified type
+        /// of component whose identifier is greater than or equal to startId
+        /// </summary>
+        /// <param name="index">Unique type of component</param>
+        /// <param name="startId">Archetype start id</param>
+        /// <returns>Archetype enumerator</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<EcsArchetype> GetArchetypes(byte index, int startId)
         {
@@ -50,6 +90,12 @@ namespace MiniEcs.Core
             }
         }
         
+        /// <summary>
+        /// Finds an existing archetype or creates a new one based on
+        /// a set of unique types of components.
+        /// </summary>
+        /// <param name="indices">A set of unique component types.</param>
+        /// <returns></returns>
         public EcsArchetype FindOrCreateArchetype(params byte[] indices)
         {
             Array.Sort(indices);
@@ -57,6 +103,13 @@ namespace MiniEcs.Core
             return InnerFindOrCreateArchetype(indices);
         }
 
+        /// <summary>
+        /// Finds an existing archetype or creates a new one based on a set
+        /// of unique types of components without pre-sorting
+        /// to improve performance.
+        /// </summary>
+        /// <param name="indices">A set of unique component types.</param>
+        /// <returns>Existing or new archetype</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private EcsArchetype InnerFindOrCreateArchetype(byte[] indices)
         {
@@ -88,6 +141,13 @@ namespace MiniEcs.Core
             return curArchetype;
         }
 
+        /// <summary>
+        /// Finds or creates the next archetype based on an existing archetype
+        /// after adding a new component type
+        /// </summary>
+        /// <param name="archetype">base archetype</param>
+        /// <param name="addIndex">new component type</param>
+        /// <returns>Existing or new archetype</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EcsArchetype FindOrCreateNextArchetype(EcsArchetype archetype, byte addIndex)
         {
@@ -112,6 +172,13 @@ namespace MiniEcs.Core
             return InnerFindOrCreateArchetype(indices);
         }
         
+        /// <summary>
+        /// Finds or creates a previous archetype based on an existing archetype
+        /// after deleting an existing component type
+        /// </summary>
+        /// <param name="archetype">base archetype</param>
+        /// <param name="removeIndex">component type</param>
+        /// <returns>Existing or new archetype</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EcsArchetype FindOrCreatePriorArchetype(EcsArchetype archetype, byte removeIndex)
         {

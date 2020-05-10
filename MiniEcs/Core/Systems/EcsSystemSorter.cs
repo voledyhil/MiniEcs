@@ -1,17 +1,38 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace MiniEcs.Core.Systems
 {
+    /// <inheritdoc />
+    /// <summary>
+    /// Occurs when the list of nodes cannot be sorted.
+    /// For example, the system "A" has the attribute EcsUpdateAfterAttribute(typeof(B)),
+    /// and the system "B" has the attribute EcsUpdateAfterAttribute(typeof(A))
+    /// </summary>
     public class SystemSorterException : Exception
     {
         public SystemSorterException(string message) : base(message)
         {
+            
         }
     }
 
-    public static class SystemSorter
+    /// <summary>
+    /// Sorts the list of systems based on attributes
+    /// <see cref="EcsUpdateBeforeAttribute"/> and <see cref="EcsUpdateAfterAttribute"/>
+    /// </summary>
+    public static class EcsSystemSorter
     {
+        /// <summary>
+        /// Sorts the list of systems based on attributes
+        /// <see cref="EcsUpdateBeforeAttribute"/> and <see cref="EcsUpdateAfterAttribute"/>
+        /// </summary>
+        /// <param name="systems">List of systems</param>
+        /// <exception cref="SystemSorterException">
+        /// Occurs when the list of nodes cannot be sorted
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort<T>(List<T> systems)
         {
             SystemDependencies<T>[] dependencies = new SystemDependencies<T>[systems.Count];
