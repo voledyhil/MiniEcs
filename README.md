@@ -189,3 +189,11 @@ Intel Core i7-8850H CPU 2.60GHz (Coffee Lake), 1 CPU, 12 logical and 6 physical 
 - Caching Destroyed Entities
 - Extending EcsWorld, EcsEntity, and EcsSystem Interfaces
 - Transition from AoS (array of structures) to SoA (struct of arrays) PERFORMANCE!
+
+
+## References
+1. Building an ECS #2: Archetypes and Vectorization (https://medium.com/@ajmmertens/building-an-ecs-2-archetypes-and-vectorization-fe21690805f9)
+
+2. ECS back and forth (Part 2 - Where are my entities?) https://skypjack.github.io/2019-03-07-ecs-baf-part-2/https://skypjack.github.io/2019-03-07-ecs-baf-part-2/
+
+3. World, system groups, update order, and the player loop (https://gametorrahod.com/world-system-groups-update-order-and-the-player-loop/)
