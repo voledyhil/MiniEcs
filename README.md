@@ -186,7 +186,10 @@ Intel Core i7-8850H CPU 2.60GHz (Coffee Lake), 1 CPU, 12 logical and 6 physical 
 | MiniEcsStressTest |  9.264 ms | 0.1101 ms | 0.0919 ms | 156.2500 | 15.6250 |     - | 764.34 KB |
 
 ### TODO
-- Caching Destroyed Entities
+~~~
+Caching Destroyed Entities
+~~~
+
 - Extending EcsWorld, EcsEntity, and EcsSystem Interfaces
 - Transition from AoS (array of structures) to SoA (struct of arrays) PERFORMANCE!
 - Binary serialization, deserialization, div compression
