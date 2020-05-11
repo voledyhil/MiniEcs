@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -79,16 +80,20 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void AllFilterTest()
         {
-            List<EcsEntity> entities = _world.Filter(new EcsFilter().AllOf(ComponentType.B)).ToList();
+            IEcsGroup group = _world.Filter(new EcsFilter().AllOf(ComponentType.B));
+            List<EcsEntity> entities = group.ToList();
             Assert.AreEqual(5, entities.Count);
+            Assert.AreEqual(5, group.CalculateCount());
             
             Assert.IsTrue(entities.Contains(_entityABD));
             Assert.IsTrue(entities.Contains(_entityBD0));
             Assert.IsTrue(entities.Contains(_entityBD1));
             Assert.IsTrue(entities.Contains(_entityBC));
             Assert.IsTrue(entities.Contains(_entityAB));
-            
-            entities = _world.Filter(new EcsFilter().AllOf(ComponentType.B, ComponentType.D)).ToList();
+
+            group = _world.Filter(new EcsFilter().AllOf(ComponentType.B, ComponentType.D));
+            entities = group.ToList();
+            Assert.AreEqual(3, group.CalculateCount());
             Assert.AreEqual(3, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityABD));
@@ -100,17 +105,21 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void AnyFilterTest()
         {
-            List<EcsEntity> entities = _world.Filter(new EcsFilter().AnyOf(ComponentType.B)).ToList();
+            IEcsGroup group = _world.Filter(new EcsFilter().AnyOf(ComponentType.B));
+            List<EcsEntity> entities = group.ToList();
             Assert.AreEqual(5, entities.Count);
+            Assert.AreEqual(5, group.CalculateCount());
             
             Assert.IsTrue(entities.Contains(_entityABD));
             Assert.IsTrue(entities.Contains(_entityBD0));
             Assert.IsTrue(entities.Contains(_entityBD1));
             Assert.IsTrue(entities.Contains(_entityBC));
             Assert.IsTrue(entities.Contains(_entityAB));
-            
-            entities = _world.Filter(new EcsFilter().AnyOf(ComponentType.B, ComponentType.D)).ToList();
+
+            group = _world.Filter(new EcsFilter().AnyOf(ComponentType.B, ComponentType.D));
+            entities = group.ToList();
             Assert.AreEqual(6, entities.Count);
+            Assert.AreEqual(6, group.CalculateCount());
             
             Assert.IsTrue(entities.Contains(_entityABD));
             Assert.IsTrue(entities.Contains(_entityBD0));
@@ -194,6 +203,56 @@ namespace MiniEcs.Tests.Core
             ComponentA componentA1 = world.GetOrCreateSingleton<ComponentA>(ComponentType.A);
             
             Assert.AreEqual(componentA0, componentA1);
+        }
+
+        [TestMethod]
+        public void CreateEntityFromProcessingTest()
+        {
+            EcsWorld world = new EcsWorld(ComponentType.TotalComponents);
+            Assert.AreEqual(0, world.EntitiesInProcessing);
+
+            EcsEntity entity = world.CreateEntity(new ComponentA());
+            uint entityId = entity.Id;
+            entity.Destroy();
+            
+            Assert.AreEqual(1, world.EntitiesInProcessing);
+            EcsEntity newEntity = world.CreateEntity(new ComponentB());
+            uint newEntityId = newEntity.Id;
+            Assert.AreEqual(0, world.EntitiesInProcessing);
+            
+            Assert.IsFalse(newEntity.HasComponent(ComponentType.A));
+            Assert.IsTrue(newEntity.HasComponent(ComponentType.B));
+
+            Assert.IsTrue(newEntityId > entityId);
+        }
+
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void AddComponentThrowExceptionTest()
+        {
+            EcsWorld world = new EcsWorld(ComponentType.TotalComponents);
+            EcsEntity entity = world.CreateEntity();
+            entity[ComponentType.A] = new ComponentA();
+            entity[ComponentType.A] = new ComponentA();
+        }
+        
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void AddComponentThrowExceptionTest2()
+        {
+            EcsWorld world = new EcsWorld(ComponentType.TotalComponents);
+            EcsEntity entity = world.CreateEntity();
+            entity[ComponentType.A] = new ComponentB();
+        }
+        
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void RemoveComponentThrowExceptionTest()
+        {
+            EcsWorld world = new EcsWorld(ComponentType.TotalComponents);
+            EcsEntity entity = world.CreateEntity();
+            entity[ComponentType.A] = null;
         }
 
     }

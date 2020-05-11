@@ -11,7 +11,7 @@ namespace MiniEcs.Core
         public static readonly IEqualityComparer<EcsEntity> Comparer = new EntityComparer();
         public bool Equals(EcsEntity entityA, EcsEntity entityB) 
         {
-            return entityA == entityB;
+            return entityA.Id == entityB.Id;
         }
 
         public int GetHashCode(EcsEntity entity)

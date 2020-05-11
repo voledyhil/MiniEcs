@@ -16,7 +16,10 @@ namespace MiniEcs.Core
         /// Number of existing archetypes
         /// </summary>
         public int ArchetypeCount => _archetypeManager.ArchetypeCount;
-        
+        /// <summary>
+        /// Number Entities In Processing
+        /// </summary>
+        public int EntitiesInProcessing => _entitiesPool.Count;
         /// <summary>
         /// Entity unique identifier generator
         /// </summary>
@@ -33,7 +36,10 @@ namespace MiniEcs.Core
         /// Stores a group of archetypes for the specified filter.
         /// </summary>
         private readonly Dictionary<EcsFilter, EcsGroup> _groups = new Dictionary<EcsFilter, EcsGroup>();
-
+        /// <summary>
+        /// Pool of entities sent for processing
+        /// </summary>
+        private readonly Queue<EcsEntityExtended> _entitiesPool = new Queue<EcsEntityExtended>();
         /// <summary>
         /// Create new EcsWorld
         /// </summary>
@@ -51,7 +57,12 @@ namespace MiniEcs.Core
         /// <returns>New Entity</returns>
         public EcsEntity CreateEntity(params IEcsComponent[] components)
         {
-            return new EcsEntity(_entityCounter++, _archetypeManager, _capacity, components);
+            if (_entitiesPool.Count <= 0)
+                return new EcsEntityExtended(_entityCounter++, _entitiesPool, _archetypeManager, _capacity, components);
+            
+            EcsEntityExtended entity = _entitiesPool.Dequeue();
+            entity.Initialize(_entityCounter++, components);
+            return entity;
         }
 
         /// <summary>
@@ -172,6 +183,28 @@ namespace MiniEcs.Core
             }
 
             return buffer0;
+        }
+
+
+        private class EcsEntityExtended : EcsEntity
+        {
+            private readonly Queue<EcsEntityExtended> _entitiesPool;
+
+            public EcsEntityExtended(uint id, Queue<EcsEntityExtended> entitiesPool,
+                EcsArchetypeManager archetypeManager, int capacity, params IEcsComponent[] components) : base(id, archetypeManager, capacity, components)
+            {
+                _entitiesPool = entitiesPool;
+            }
+            
+            public void Initialize(uint id, params IEcsComponent[] components)
+            {
+                InnerInitialize(id, components);
+            }
+
+            protected override void OnDestroy()
+            {
+                _entitiesPool.Enqueue(this);
+            }
         }
     }
 }

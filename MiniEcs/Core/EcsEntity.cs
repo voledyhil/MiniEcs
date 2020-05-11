@@ -10,7 +10,7 @@ namespace MiniEcs.Core
         /// <summary>
         /// Unique identifier of an entity
         /// </summary>
-        public uint Id { get; }
+        public uint Id { get; private set; }
         
         /// <summary>
         /// Current Entity Archetype
@@ -19,13 +19,13 @@ namespace MiniEcs.Core
         /// <summary>
         /// Archetype Manager
         /// </summary>
-        private EcsArchetypeManager _archetypeManager;
+        private readonly EcsArchetypeManager _archetypeManager;
         
         /// <summary>
         /// Сollection of components. Memory is allocated for all possible types of
         /// unique components, for quick access by index
         /// </summary>
-        private IEcsComponent[] _components;
+        private readonly IEcsComponent[] _components;
 
         /// <summary>
         /// Creates a new entity, with an initial set of components.
@@ -35,19 +35,40 @@ namespace MiniEcs.Core
         /// <param name="capacity">Number of all possible component types</param>
         /// <param name="components">Initial set of components</param>
         public EcsEntity(uint id, EcsArchetypeManager archetypeManager, int capacity, params IEcsComponent[] components)
-        {
-            Id = id;
-        
+        {                     
             _components = new IEcsComponent[capacity];            
             _archetypeManager = archetypeManager;
-            
+
+            InnerInitialize(id, components);
+        }
+
+        /// <summary>
+        /// Initialize Entity, with an initial set of components.
+        /// </summary>
+        /// <param name="id">Unique identifier of an entity</param>
+        /// <param name="components">Initial set of components</param>
+        protected void InnerInitialize(uint id, params IEcsComponent[] components)
+        {
+            Id = id;
             _archetype = _archetypeManager.Empty;
             _archetype.Entities.Add(this);
-        
+
             foreach (IEcsComponent component in components)
             {
                 this[component.Index] = component;
             }
+        }
+
+        /// <summary>
+        /// Determines whether the specified component type is contained in an entity.
+        /// </summary>
+        /// <param name="index">Component type</param>
+        /// <returns>
+        /// true if the entity contains a component of the specified type; otherwise, false.
+        /// </returns>
+        public bool HasComponent(byte index)
+        {
+            return _components[index] != null;
         }
 
         /// <summary>
@@ -90,11 +111,19 @@ namespace MiniEcs.Core
         /// </summary>
         public void Destroy()
         {
+            foreach (byte index in _archetype.Indices)
+            {
+                _components[index] = null;
+            }
+            
             _archetype.Entities.Remove(this);
             _archetype = null;
-            _components = null;
-            _archetypeManager = null;
+
+            OnDestroy();
         }
-       
+
+        protected virtual void OnDestroy()
+        {
+        }
     }
 }

@@ -89,7 +89,7 @@ namespace MiniEcs.Core
 
         public bool Equals(EcsFilter other)
         {
-            if (other == null || other.GetType() != GetType() || other.GetHashCode() != GetHashCode())
+            if (other == null || other.GetHashCode() != GetHashCode() || other.GetType() != GetType())
                 return false;
 
             if (other.All != null && All != null && !other.All.SetEquals(All))
