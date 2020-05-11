@@ -168,6 +168,10 @@ engine.AddSystem(new SystemC());
 // update order C -> A -> B
 engine.Update(0.1f, world);
 ```
+## Examples
+### [MiniEcsPhysics](https://github.com/voledyhil/MiniEcsPhysics)
+Implementing a simple 2D isometric physical using MiniEcs framework
+![Preview](/images/preview.gif)
 
 ### Stress Test
 
