@@ -180,10 +180,10 @@ Intel Core i7-8850H CPU 2.60GHz (Coffee Lake), 1 CPU, 12 logical and 6 physical 
   [Host]     : .NET Core 2.2.5 (CoreCLR 4.6.27617.05, CoreFX 4.6.27618.01), X64 RyuJIT
   DefaultJob : .NET Core 2.2.5 (CoreCLR 4.6.27617.05, CoreFX 4.6.27618.01), X64 RyuJIT
 ```
-|            Method |      Mean |     Error |    StdDev |    Median |    Gen 0 |    Gen 1 | Gen 2 |  Allocated |
-|-------------------|----------:|----------:|----------:|----------:|---------:|---------:|------:|-----------:|
-| EntitasStressTest | 16.062 ms | 0.2622 ms | 0.6998 ms | 15.813 ms |  62.5000 |  31.2500 |     - |  480.82 KB |
-| MiniEcsStressTest |  9.391 ms | 0.0523 ms | 0.0464 ms |  9.383 ms | 296.8750 | 109.3750 |     - | 1475.27 KB |
+|            Method |      Mean |     Error |    StdDev |    Gen 0 |   Gen 1 | Gen 2 | Allocated |
+|------------------ |----------:|----------:|----------:|---------:|--------:|------:|----------:|
+| EntitasStressTest | 15.899 ms | 0.3122 ms | 0.4673 ms |  62.5000 | 31.2500 |     - | 480.82 KB |
+| MiniEcsStressTest |  9.264 ms | 0.1101 ms | 0.0919 ms | 156.2500 | 15.6250 |     - | 764.34 KB |
 
 ### TODO
 - Caching Destroyed Entities
