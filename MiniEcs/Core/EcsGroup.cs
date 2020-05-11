@@ -70,6 +70,7 @@ namespace MiniEcs.Core
             return count;
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// Returns an enumerator of all entities in the group
         /// </summary>
@@ -80,11 +81,14 @@ namespace MiniEcs.Core
             for (int i = 0; i < _archetypes.Count; i++)
             {
                 EcsArchetype archetype = _archetypes[i];
+                if (archetype.Entities.Count <= 0) 
+                    continue;
+
+                HashSet<EcsEntity>.Enumerator enumerator = archetype.GetEnumerator();
+                while (enumerator.MoveNext())
+                    yield return enumerator.Current;
                 
-                foreach (EcsEntity entity in archetype)
-                {
-                    yield return entity;
-                }
+                enumerator.Dispose();
             }
         }
         
