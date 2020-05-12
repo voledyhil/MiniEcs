@@ -8,7 +8,7 @@ namespace MiniEcs.Core
     /// <summary>
     /// collection of archetypes matching filter criteria
     /// </summary>
-    public interface IEcsGroup : IEnumerable<EcsEntity>
+    public interface IEcsGroup : IEnumerable<IEcsEntity>
     {
         /// <summary>
         /// Calculate the number of entities in a group
@@ -66,8 +66,9 @@ namespace MiniEcs.Core
             int count = 0;
             foreach (EcsArchetype archetype in _archetypes)
             {
-                count += archetype.Entities.Count;
+                count += archetype.EntitiesCount;
             }
+
             return count;
         }
 
@@ -77,19 +78,19 @@ namespace MiniEcs.Core
         /// </summary>
         /// <returns>Enumerator of entities</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerator<EcsEntity> GetEnumerator()
+        public IEnumerator<IEcsEntity> GetEnumerator()
         {
             for (int i = 0; i < _archetypes.Count; i++)
             {
                 EcsArchetype archetype = _archetypes[i];
-                if (archetype.Entities.Count <= 0)
+                if (archetype.EntitiesCount <= 0)
                     continue;
 
-                HashSet<EcsEntity>.Enumerator enumerator = archetype.GetEnumerator();
-                while (enumerator.MoveNext())
-                    yield return enumerator.Current;
-
-                enumerator.Dispose();
+                EcsEntity[] entities = archetype.GetEntities(out int length);
+                for (int j = 0; j < length; j++)
+                {
+                    yield return entities[j];
+                }
             }
         }
 

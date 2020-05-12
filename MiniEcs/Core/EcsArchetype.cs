@@ -1,26 +1,8 @@
+using System;
 using System.Collections.Generic;
 
 namespace MiniEcs.Core
 {
-    /// <inheritdoc />
-    /// <summary>
-    /// Methods to maintain effective comparison of entities for equality.
-    /// </summary>
-    public class EntityComparer : IEqualityComparer<EcsEntity>
-    {
-        public static readonly IEqualityComparer<EcsEntity> Comparer = new EntityComparer();
-
-        public bool Equals(EcsEntity entityA, EcsEntity entityB)
-        {
-            return entityA.Id == entityB.Id;
-        }
-
-        public int GetHashCode(EcsEntity entity)
-        {
-            return (int) entity.Id;
-        }
-    }
-
     /// <summary>
     /// An archetype is a unique combination of component types.
     /// <see cref="EcsWorld"/> uses the archetype to group all objects
@@ -37,6 +19,32 @@ namespace MiniEcs.Core
         /// Number of unique combinations of component types
         /// </summary>
         public int IndicesCount => Indices.Length;
+
+        /// <summary>
+        /// Calculate number entities in archetype
+        /// </summary>
+        public int EntitiesCount
+        {
+            get
+            {
+                if (!_needRemoveHoles)
+                    return _length;
+
+                RemoveHoles();
+                _needRemoveHoles = false;
+                return _length;
+            }
+        }
+
+        /// <summary>
+        /// Number entities in archetype
+        /// </summary>
+        private int _length;
+
+        /// <summary>
+        /// There are holes in the array, you need to rebuild the entities
+        /// </summary>
+        private bool _needRemoveHoles;
 
         /// <summary>
         /// Сreates a new archetype
@@ -57,7 +65,7 @@ namespace MiniEcs.Core
         /// <summary>
         /// Set of entities corresponding to archetype
         /// </summary>
-        public readonly HashSet<EcsEntity> Entities = new HashSet<EcsEntity>(EntityComparer.Comparer);
+        private EcsEntity[] _entities = new EcsEntity[1];
 
         /// <summary>
         /// Transitions to the next archetype when adding a new type of component
@@ -70,12 +78,83 @@ namespace MiniEcs.Core
         public readonly Dictionary<byte, EcsArchetype> Prior = new Dictionary<byte, EcsArchetype>();
 
         /// <summary>
-        /// Returns an enumerator of all entities of a given archetype
+        /// Returns all entities of a given archetype
         /// </summary>
-        /// <returns>Enumerator of entities</returns>
-        public HashSet<EcsEntity>.Enumerator GetEnumerator()
+        /// <param name="length">Number entities in archetype</param>
+        /// <returns>Entities array</returns>
+        public EcsEntity[] GetEntities(out int length)
         {
-            return Entities.GetEnumerator();
+            if (_needRemoveHoles)
+            {
+                RemoveHoles();
+                _needRemoveHoles = false;
+            }
+
+            length = _length;
+            return _entities;
+        }
+
+        /// <summary>
+        /// Add Entity to archetype
+        /// </summary>
+        /// <param name="entity">New Entity</param>
+        public void AddEntity(EcsEntity entity)
+        {
+            if (_length >= _entities.Length)
+                Array.Resize(ref _entities, 2 * _entities.Length);
+
+            entity.ArchetypeIndex = _length;
+
+            _entities[_length++] = entity;
+        }
+
+        /// <summary>
+        /// Remove entity from archetype
+        /// </summary>
+        /// <param name="entity">Entity to remove</param>
+        public void RemoveEntity(EcsEntity entity)
+        {
+            _entities[entity.ArchetypeIndex] = null;
+            _needRemoveHoles = true;
+        }
+
+        /// <summary>
+        /// Remove holes from the archetype
+        /// </summary>
+        private void RemoveHoles()
+        {
+            int freeIndex = int.MaxValue;
+            for (int i = 0; i < _length; i++)
+            {
+                if (_entities[i] != null)
+                    continue;
+
+                freeIndex = i;
+                break;
+            }
+
+            if (freeIndex >= _length)
+                return;
+
+            int current = freeIndex + 1;
+            while (current < _length)
+            {
+                while (current < _length && _entities[current] == null)
+                    current++;
+
+                if (current >= _length)
+                    continue;
+
+                EcsEntity entity = _entities[current];
+                entity.ArchetypeIndex = freeIndex;
+
+                _entities[freeIndex] = entity;
+
+                freeIndex++;
+                current++;
+            }
+
+            _length = freeIndex;
         }
     }
 }

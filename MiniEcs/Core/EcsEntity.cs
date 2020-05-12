@@ -2,11 +2,26 @@ using System;
 
 namespace MiniEcs.Core
 {
+    public interface IEcsEntity
+    {
+        uint Id { get; }
+        bool HasComponent<T>() where T : IEcsComponent;
+        T GetComponent<T>() where T : IEcsComponent;
+        void AddComponent<T>(T component) where T : IEcsComponent;
+        void RemoveComponent<T>() where T : IEcsComponent;
+        void Destroy();
+    }
+
     /// <summary>
     /// An entity is a collection of unique components
     /// </summary>
-    public abstract class EcsEntity
+    public abstract class EcsEntity : IEcsEntity
     {
+        /// <summary>
+        /// Position within the archetype
+        /// </summary>
+        public int ArchetypeIndex;
+
         /// <summary>
         /// Unique identifier of an entity
         /// </summary>
@@ -38,46 +53,46 @@ namespace MiniEcs.Core
             _archetypeManager = archetypeManager;
         }
 
-        protected void InnerInitialize(uint id)
+        public void Initialize(uint id)
         {
             Id = id;
             _archetype = _archetypeManager.Empty;
-            _archetype.Entities.Add(this);
+            _archetype.AddEntity(this);
         }
 
-        protected void InnerInitialize<T0>(uint id, T0 component0) where T0 : IEcsComponent
+        public void Initialize<T0>(uint id, T0 component0) where T0 : IEcsComponent
         {
-            InnerInitialize(id);
+            Initialize(id);
 
             AddComponent(component0);
         }
 
-        protected void InnerInitialize<T0, T1>(uint id, T0 component0, T1 component1)
+        public void Initialize<T0, T1>(uint id, T0 component0, T1 component1)
             where T0 : IEcsComponent where T1 : IEcsComponent
         {
-            InnerInitialize(id);
+            Initialize(id);
 
             AddComponent(component0);
             AddComponent(component1);
         }
 
-        protected void InnerInitialize<T0, T1, T2>(uint id, T0 component0, T1 component1, T2 component2)
+        public void Initialize<T0, T1, T2>(uint id, T0 component0, T1 component1, T2 component2)
             where T0 : IEcsComponent where T1 : IEcsComponent where T2 : IEcsComponent
         {
-            InnerInitialize(id);
+            Initialize(id);
 
             AddComponent(component0);
             AddComponent(component1);
             AddComponent(component2);
         }
 
-        protected void InnerInitialize<T0, T1, T2, T3>(uint id, T0 component0, T1 component1, T2 component2,
+        public void Initialize<T0, T1, T2, T3>(uint id, T0 component0, T1 component1, T2 component2,
             T3 component3) where T0 : IEcsComponent
             where T1 : IEcsComponent
             where T2 : IEcsComponent
             where T3 : IEcsComponent
         {
-            InnerInitialize(id);
+            Initialize(id);
 
             AddComponent(component0);
             AddComponent(component1);
@@ -128,9 +143,9 @@ namespace MiniEcs.Core
             if (!(comp == null && component != null))
                 throw new ArgumentException();
 
-            _archetype.Entities.Remove(this);
+            _archetype.RemoveEntity(this);
             _archetype = _archetypeManager.FindOrCreateNextArchetype(_archetype, index);
-            _archetype.Entities.Add(this);
+            _archetype.AddEntity(this);
 
             _components[index] = component;
         }
@@ -150,9 +165,9 @@ namespace MiniEcs.Core
             if (component == null)
                 throw new InvalidOperationException();
 
-            _archetype.Entities.Remove(this);
+            _archetype.RemoveEntity(this);
             _archetype = _archetypeManager.FindOrCreatePriorArchetype(_archetype, index);
-            _archetype.Entities.Add(this);
+            _archetype.AddEntity(this);
 
             _components[index] = null;
         }
@@ -167,7 +182,7 @@ namespace MiniEcs.Core
                 _components[index] = null;
             }
 
-            _archetype.Entities.Remove(this);
+            _archetype.RemoveEntity(this);
             _archetype = null;
 
             OnDestroy();

@@ -27,13 +27,13 @@ namespace MiniEcs.Tests.Core
     public class EcsWorldTest
     {
         private static EcsWorld _world;
-        private static EcsEntity _entityAB;
-        private static EcsEntity _entityABD;
-        private static EcsEntity _entityAC;
-        private static EcsEntity _entityAD;
-        private static EcsEntity _entityBC;
-        private static EcsEntity _entityBD0;
-        private static EcsEntity _entityBD1;
+        private static IEcsEntity _entityAB;
+        private static IEcsEntity _entityABD;
+        private static IEcsEntity _entityAC;
+        private static IEcsEntity _entityAD;
+        private static IEcsEntity _entityBC;
+        private static IEcsEntity _entityBD0;
+        private static IEcsEntity _entityBD1;
 
         [ClassInitialize]
         public static void InitFilterWorld(TestContext testContext)
@@ -79,7 +79,7 @@ namespace MiniEcs.Tests.Core
             EcsWorld world = new EcsWorld();
             
             ComponentB componentB = new ComponentB();
-            EcsEntity entity = world.CreateEntity();
+            IEcsEntity entity = world.CreateEntity();
             entity.AddComponent(new ComponentA());
             entity.AddComponent(componentB);
             entity.AddComponent(new ComponentC());
@@ -97,7 +97,7 @@ namespace MiniEcs.Tests.Core
         public void AllFilterTest()
         {
             IEcsGroup group = _world.Filter(new EcsFilter().AllOf<ComponentB>());
-            List<EcsEntity> entities = group.ToList();
+            List<IEcsEntity> entities = group.ToList();
             Assert.AreEqual(5, entities.Count);
             Assert.AreEqual(5, group.CalculateCount());
             
@@ -122,7 +122,7 @@ namespace MiniEcs.Tests.Core
         public void AnyFilterTest()
         {
             IEcsGroup group = _world.Filter(new EcsFilter().AllOf<ComponentB>());
-            List<EcsEntity> entities = group.ToList();
+            List<IEcsEntity> entities = group.ToList();
             Assert.AreEqual(5, entities.Count);
             Assert.AreEqual(5, group.CalculateCount());
             
@@ -148,7 +148,7 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void NoneFilterTest()
         {
-            List<EcsEntity> entities = _world.Filter(new EcsFilter().NoneOf<ComponentB, ComponentD>()).ToList();
+            List<IEcsEntity> entities = _world.Filter(new EcsFilter().NoneOf<ComponentB, ComponentD>()).ToList();
             Assert.AreEqual(1, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityAC));
@@ -163,7 +163,7 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void AllAnyFilterTest()
         {
-            List<EcsEntity> entities = _world.Filter(new EcsFilter().AllOf<ComponentB, ComponentB, ComponentD>().AnyOf<ComponentA>()).ToList();
+            List<IEcsEntity> entities = _world.Filter(new EcsFilter().AllOf<ComponentB, ComponentB, ComponentD>().AnyOf<ComponentA>()).ToList();
             Assert.AreEqual(1, entities.Count);
             Assert.IsTrue(entities.Contains(_entityABD));
             
@@ -179,7 +179,7 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void AllNoneFilterTest()
         {
-            List<EcsEntity> entities = _world.Filter(new EcsFilter().AllOf<ComponentB>().NoneOf<ComponentA>()).ToList();
+            List<IEcsEntity> entities = _world.Filter(new EcsFilter().AllOf<ComponentB>().NoneOf<ComponentA>()).ToList();
             Assert.AreEqual(3, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityBD0));
@@ -197,9 +197,9 @@ namespace MiniEcs.Tests.Core
         public void GroupIncVersionFilterTest()
         {
             EcsWorld world = new EcsWorld();            
-            EcsEntity entity = world.CreateEntity(new ComponentA(), new ComponentB());
+            IEcsEntity entity = world.CreateEntity(new ComponentA(), new ComponentB());
 
-            List<EcsEntity> entities = world.Filter(new EcsFilter().AllOf<ComponentB>()).ToList();
+            List<IEcsEntity> entities = world.Filter(new EcsFilter().AllOf<ComponentB>()).ToList();
             Assert.AreEqual(1, entities.Count);
             
             entity.AddComponent(new ComponentC());
@@ -228,12 +228,12 @@ namespace MiniEcs.Tests.Core
             EcsWorld world = new EcsWorld();
             Assert.AreEqual(0, world.EntitiesInProcessing);
 
-            EcsEntity entity = world.CreateEntity(new ComponentA());
+            IEcsEntity entity = world.CreateEntity(new ComponentA());
             uint entityId = entity.Id;
             entity.Destroy();
             
             Assert.AreEqual(1, world.EntitiesInProcessing);
-            EcsEntity newEntity = world.CreateEntity(new ComponentB());
+            IEcsEntity newEntity = world.CreateEntity(new ComponentB());
             uint newEntityId = newEntity.Id;
             Assert.AreEqual(0, world.EntitiesInProcessing);
             
@@ -248,7 +248,7 @@ namespace MiniEcs.Tests.Core
         public void AddComponentThrowExceptionTest()
         {
             EcsWorld world = new EcsWorld();
-            EcsEntity entity = world.CreateEntity();
+            IEcsEntity entity = world.CreateEntity();
             entity.AddComponent(new ComponentA());
             entity.AddComponent(new ComponentA());
         }
@@ -258,7 +258,7 @@ namespace MiniEcs.Tests.Core
         public void RemoveComponentThrowExceptionTest()
         {
             EcsWorld world = new EcsWorld();
-            EcsEntity entity = world.CreateEntity();
+            IEcsEntity entity = world.CreateEntity();
             entity.RemoveComponent<ComponentA>();
         }
     }

@@ -156,17 +156,17 @@ namespace MiniEcs.Benchmark
         [Benchmark]
         public void MiniEcsStressTest()
         {
-            List<EcsEntity> entities = new List<EcsEntity>();
+            List<IEcsEntity> entities = new List<IEcsEntity>();
 
             for (int i = 0; i < 100; i++)
             {
-                EcsEntity entityABD = _world.CreateEntity(new MiniEcsComponentA(), new MiniEcsComponentB(), new MiniEcsComponentD());
-                EcsEntity entityAC = _world.CreateEntity(new MiniEcsComponentA(), new MiniEcsComponentC());
-                EcsEntity entityBD0 = _world.CreateEntity(new MiniEcsComponentB(), new MiniEcsComponentD());
-                EcsEntity entityBD1 = _world.CreateEntity(new MiniEcsComponentB(), new MiniEcsComponentD());
-                EcsEntity entityBC = _world.CreateEntity(new MiniEcsComponentB(), new MiniEcsComponentC());
-                EcsEntity entityAB = _world.CreateEntity(new MiniEcsComponentA(), new MiniEcsComponentB());
-                EcsEntity entityAD = _world.CreateEntity(new MiniEcsComponentA(), new MiniEcsComponentD());
+                IEcsEntity entityABD = _world.CreateEntity(new MiniEcsComponentA(), new MiniEcsComponentB(), new MiniEcsComponentD());
+                IEcsEntity entityAC = _world.CreateEntity(new MiniEcsComponentA(), new MiniEcsComponentC());
+                IEcsEntity entityBD0 = _world.CreateEntity(new MiniEcsComponentB(), new MiniEcsComponentD());
+                IEcsEntity entityBD1 = _world.CreateEntity(new MiniEcsComponentB(), new MiniEcsComponentD());
+                IEcsEntity entityBC = _world.CreateEntity(new MiniEcsComponentB(), new MiniEcsComponentC());
+                IEcsEntity entityAB = _world.CreateEntity(new MiniEcsComponentA(), new MiniEcsComponentB());
+                IEcsEntity entityAD = _world.CreateEntity(new MiniEcsComponentA(), new MiniEcsComponentD());
 
                 entities.Add(entityABD);
                 entities.Add(entityAC);
@@ -177,12 +177,12 @@ namespace MiniEcs.Benchmark
                 entities.Add(entityAD);
             }
 
-            foreach (EcsEntity entity in _world.Filter(new EcsFilter().AllOf<MiniEcsComponentA>().NoneOf<MiniEcsComponentB, MiniEcsComponentD>()))
+            foreach (IEcsEntity entity in _world.Filter(new EcsFilter().AllOf<MiniEcsComponentA>().NoneOf<MiniEcsComponentB, MiniEcsComponentD>()))
             {
                 MiniEcsComponentA comp = entity.GetComponent<MiniEcsComponentA>();
             }
 
-            foreach (EcsEntity entity in entities)
+            foreach (IEcsEntity entity in entities)
             {
                 entity.Destroy();
             }

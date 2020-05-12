@@ -54,7 +54,7 @@ namespace MiniEcs.Core
         /// Creates a new entity
         /// </summary>
         /// <returns>New Entity</returns>
-        public EcsEntity CreateEntity()
+        public IEcsEntity CreateEntity()
         {
             EcsEntityExtended entity = _entitiesPool.Count <= 0
                 ? new EcsEntityExtended(_entitiesPool, _archetypeManager)
@@ -69,7 +69,7 @@ namespace MiniEcs.Core
         /// <param name="component0">Component</param>
         /// <typeparam name="T0">Component Type</typeparam>
         /// <returns>New Entity</returns>
-        public EcsEntity CreateEntity<T0>(T0 component0) where T0 : IEcsComponent
+        public IEcsEntity CreateEntity<T0>(T0 component0) where T0 : IEcsComponent
         {
             EcsEntityExtended entity = _entitiesPool.Count <= 0
                 ? new EcsEntityExtended(_entitiesPool, _archetypeManager)
@@ -86,7 +86,7 @@ namespace MiniEcs.Core
         /// <typeparam name="T0">Component Type</typeparam>
         /// <typeparam name="T1">Component Type</typeparam>
         /// <returns>New Entity</returns>
-        public EcsEntity CreateEntity<T0, T1>(T0 component0, T1 component1)
+        public IEcsEntity CreateEntity<T0, T1>(T0 component0, T1 component1)
             where T0 : IEcsComponent where T1 : IEcsComponent
         {
             EcsEntityExtended entity = _entitiesPool.Count <= 0
@@ -106,7 +106,7 @@ namespace MiniEcs.Core
         /// <typeparam name="T1">Component Type</typeparam>
         /// <typeparam name="T2">Component Type</typeparam>
         /// <returns>New Entity</returns>
-        public EcsEntity CreateEntity<T0, T1, T2>(T0 component0, T1 component1, T2 component2) where T0 : IEcsComponent
+        public IEcsEntity CreateEntity<T0, T1, T2>(T0 component0, T1 component1, T2 component2) where T0 : IEcsComponent
             where T1 : IEcsComponent
             where T2 : IEcsComponent
         {
@@ -129,7 +129,7 @@ namespace MiniEcs.Core
         /// <typeparam name="T2">Component Type</typeparam>
         /// <typeparam name="T3">Component Type</typeparam>
         /// <returns>New Entity</returns>
-        public EcsEntity CreateEntity<T0, T1, T2, T3>(T0 component0, T1 component1, T2 component2, T3 component3)
+        public IEcsEntity CreateEntity<T0, T1, T2, T3>(T0 component0, T1 component1, T2 component2, T3 component3)
             where T0 : IEcsComponent where T1 : IEcsComponent where T2 : IEcsComponent where T3 : IEcsComponent
         {
             EcsEntityExtended entity = _entitiesPool.Count <= 0
@@ -147,10 +147,10 @@ namespace MiniEcs.Core
         public T GetOrCreateSingleton<T>() where T : class, IEcsComponent, new()
         {
             EcsArchetype archetype = _archetypeManager.FindOrCreateArchetype(EcsComponentType<T>.Index);
-            foreach (EcsEntity entity in archetype)
-            {
-                return entity.GetComponent<T>();
-            }
+            EcsEntity[] entities = archetype.GetEntities(out int length);
+
+            for (int i = 0; i < length;)
+                return entities[i].GetComponent<T>();
 
             T component = new T();
             CreateEntity(component);
@@ -268,35 +268,6 @@ namespace MiniEcs.Core
             {
                 _entitiesPool = entitiesPool;
             }
-
-            public void Initialize(uint id)
-            {
-                InnerInitialize(id);
-            }
-
-            public void Initialize<T0>(uint id, T0 component0) where T0 : IEcsComponent
-            {
-                InnerInitialize(id, component0);
-            }
-
-            public void Initialize<T0, T1>(uint id, T0 component0, T1 component1)
-                where T0 : IEcsComponent where T1 : IEcsComponent
-            {
-                InnerInitialize(id, component0, component1);
-            }
-
-            public void Initialize<T0, T1, T2>(uint id, T0 component0, T1 component1, T2 component2)
-                where T0 : IEcsComponent where T1 : IEcsComponent where T2 : IEcsComponent
-            {
-                InnerInitialize(id, component0, component1, component2);
-            }
-
-            public void Initialize<T0, T1, T2, T3>(uint id, T0 component0, T1 component1, T2 component2, T3 component3)
-                where T0 : IEcsComponent where T1 : IEcsComponent where T2 : IEcsComponent where T3 : IEcsComponent
-            {
-                InnerInitialize(id, component0, component1, component2, component3);
-            }
-
 
             protected override void OnDestroy()
             {
