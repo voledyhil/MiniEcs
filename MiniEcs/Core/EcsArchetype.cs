@@ -35,37 +35,11 @@ namespace MiniEcs.Core
                 return _length;
             }
         }
-
-        /// <summary>
-        /// Number entities in archetype
-        /// </summary>
-        private int _length;
-
-        /// <summary>
-        /// There are holes in the array, you need to rebuild the entities
-        /// </summary>
-        private bool _needRemoveHoles;
-
-        /// <summary>
-        /// Сreates a new archetype
-        /// </summary>
-        /// <param name="id">Archetype unique identifier</param>
-        /// <param name="indices">Unique combinations of component types</param>
-        public EcsArchetype(int id, byte[] indices)
-        {
-            Id = id;
-            Indices = indices;
-        }
-
+        
         /// <summary>
         /// Unique combinations of component types
         /// </summary>
         public readonly byte[] Indices;
-
-        /// <summary>
-        /// Set of entities corresponding to archetype
-        /// </summary>
-        private EcsEntity[] _entities = new EcsEntity[1];
 
         /// <summary>
         /// Transitions to the next archetype when adding a new type of component
@@ -77,6 +51,35 @@ namespace MiniEcs.Core
         /// </summary>
         public readonly Dictionary<byte, EcsArchetype> Prior = new Dictionary<byte, EcsArchetype>();
 
+        
+        
+
+        /// <summary>
+        /// Number entities in archetype
+        /// </summary>
+        private int _length;
+
+        /// <summary>
+        /// There are holes in the array, you need to rebuild the entities
+        /// </summary>
+        private bool _needRemoveHoles;
+        
+        /// <summary>
+        /// array of entities corresponding to archetype
+        /// </summary>
+        private EcsEntity[] _entities = new EcsEntity[1];
+
+        /// <summary>
+        /// Сreates a new archetype
+        /// </summary>
+        /// <param name="id">Archetype unique identifier</param>
+        /// <param name="indices">Unique combinations of component types</param>
+        public EcsArchetype(int id, byte[] indices)
+        {
+            Id = id;
+            Indices = indices;
+        }
+        
         /// <summary>
         /// Returns all entities of a given archetype
         /// </summary>
@@ -145,13 +148,9 @@ namespace MiniEcs.Core
                 if (current >= _length)
                     continue;
 
-                EcsEntity entity = _entities[current];
+                EcsEntity entity = _entities[current++];
                 entity.ArchetypeIndex = freeIndex;
-
-                _entities[freeIndex] = entity;
-
-                freeIndex++;
-                current++;
+                _entities[freeIndex++] = entity;
             }
 
             _length = freeIndex;
