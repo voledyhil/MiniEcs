@@ -21,7 +21,7 @@ namespace MiniEcs.Core.Systems
         /// Indicates that after updating the list, nodes should be sorted.
         /// </summary>
         private bool _dirty;
-        
+
         /// <summary>
         /// List of child systems and systems group
         /// </summary>

@@ -15,6 +15,7 @@ namespace MiniEcs.Core
         /// Number of existing archetypes
         /// </summary>
         public int ArchetypeCount => _archetypes.Count;
+
         /// <summary>
         /// Returns the first empty archetype
         /// </summary>
@@ -24,32 +25,34 @@ namespace MiniEcs.Core
         /// Archetype unique identifier generator
         /// </summary>
         private int _archetypeIdCounter;
+
         /// <summary>
         /// First empty archetype
         /// </summary>
         private readonly EcsArchetype _emptyArchetype;
+
         /// <summary>
         /// List of all archetypes created
         /// </summary>
         private readonly List<EcsArchetype> _archetypes;
+
         /// <summary>
         /// List of all archetypes corresponding to each type of component
         /// </summary>
         private readonly List<EcsArchetype>[] _archetypeIndices;
-        
+
         /// <summary>
         /// Creates an archetype manager
         /// </summary>
-        /// <param name="capacity">number of all possible component types</param>
-        public EcsArchetypeManager(byte capacity)
+        public EcsArchetypeManager()
         {
             _emptyArchetype = new EcsArchetype(_archetypeIdCounter++, new byte[] { });
-            _archetypes = new List<EcsArchetype>(2 * capacity) {_emptyArchetype};
-            _archetypeIndices = new List<EcsArchetype>[capacity];
-            
-            for (int i = 0; i < capacity; i++)
+            _archetypes = new List<EcsArchetype> {_emptyArchetype};
+            _archetypeIndices = new List<EcsArchetype>[byte.MaxValue];
+
+            for (int i = 0; i < _archetypeIndices.Length; i++)
             {
-                _archetypeIndices[i] = new List<EcsArchetype>(capacity);
+                _archetypeIndices[i] = new List<EcsArchetype>();
             }
         }
 
@@ -67,7 +70,7 @@ namespace MiniEcs.Core
                 yield return _archetypes[i];
             }
         }
-        
+
         /// <summary>
         /// Gets an enumerator of all archetypes that have the specified type
         /// of component whose identifier is greater than or equal to startId
@@ -79,17 +82,17 @@ namespace MiniEcs.Core
         public IEnumerable<EcsArchetype> GetArchetypes(byte index, int startId)
         {
             List<EcsArchetype> archetypes = _archetypeIndices[index];
-            
+
             for (int i = archetypes.Count - 1; i >= 0; i--)
             {
                 EcsArchetype archetype = archetypes[i];
                 if (archetype.Id <= startId)
                     break;
-                
+
                 yield return archetype;
             }
         }
-        
+
         /// <summary>
         /// Finds an existing archetype or creates a new one based on
         /// a set of unique types of components.
@@ -122,7 +125,7 @@ namespace MiniEcs.Core
                     byte[] archetypeIndices = new byte[i + 1];
                     for (int j = 0; j < archetypeIndices.Length; j++)
                         archetypeIndices[j] = indices[j];
-                    
+
                     nextArchetype = new EcsArchetype(_archetypeIdCounter++, archetypeIndices);
                     nextArchetype.Prior[index] = curArchetype;
                     foreach (ushort componentType in nextArchetype.Indices)
@@ -164,14 +167,16 @@ namespace MiniEcs.Core
                     indices[length++] = addIndex;
                     added = true;
                 }
+
                 indices[length++] = index;
             }
+
             if (!added)
                 indices[length] = addIndex;
-            
+
             return InnerFindOrCreateArchetype(indices);
         }
-        
+
         /// <summary>
         /// Finds or creates a previous archetype based on an existing archetype
         /// after deleting an existing component type
@@ -192,6 +197,7 @@ namespace MiniEcs.Core
                 if (index != removeIndex)
                     indices[length++] = index;
             }
+
             return InnerFindOrCreateArchetype(indices);
         }
     }

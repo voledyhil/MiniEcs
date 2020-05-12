@@ -16,7 +16,7 @@ namespace MiniEcs.Core
         /// <returns>Number of entities</returns>
         int CalculateCount();
     }
-    
+
     /// <inheritdoc />
     /// <summary>
     /// Сollection of archetypes matching filter criteria
@@ -27,11 +27,12 @@ namespace MiniEcs.Core
         /// Сurrent group version
         /// </summary>
         public int Version { get; private set; }
+
         /// <summary>
         /// List of current archetypes
         /// </summary>
         private readonly List<EcsArchetype> _archetypes;
-        
+
         /// <summary>
         /// Creates a new archetype group corresponding to the specified version.
         /// </summary>
@@ -81,17 +82,17 @@ namespace MiniEcs.Core
             for (int i = 0; i < _archetypes.Count; i++)
             {
                 EcsArchetype archetype = _archetypes[i];
-                if (archetype.Entities.Count <= 0) 
+                if (archetype.Entities.Count <= 0)
                     continue;
 
                 HashSet<EcsEntity>.Enumerator enumerator = archetype.GetEnumerator();
                 while (enumerator.MoveNext())
                     yield return enumerator.Current;
-                
+
                 enumerator.Dispose();
             }
         }
-        
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();

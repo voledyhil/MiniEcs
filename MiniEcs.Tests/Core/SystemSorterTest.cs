@@ -114,7 +114,7 @@ namespace MiniEcs.Tests.Core
             root.AddSystem(systemB);
             root.AddSystem(systemG);
             
-            root.Update(0, new EcsWorld(0));
+            root.Update(0, new EcsWorld());
 
             List<IEcsSystem> systems = new List<IEcsSystem>(root.Systems);
             Assert.AreEqual(1, systems.Count);
@@ -133,6 +133,5 @@ namespace MiniEcs.Tests.Core
 
             EcsSystemSorter.Sort(new List<IEcsSystem> {new SystemF(), new SystemG()}); //ExpectedException
         }
-
     }
 }

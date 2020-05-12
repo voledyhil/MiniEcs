@@ -5,9 +5,5 @@ namespace MiniEcs.Core
     /// </summary>
     public interface IEcsComponent
     {
-        /// <summary>
-        /// Component Type
-        /// </summary>
-        byte Index { get; }
     }
 }

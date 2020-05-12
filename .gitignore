@@ -13,3 +13,6 @@ MiniEcs.Benchmark/BenchmarkDotNet.Artifacts
 MiniEcs.Benchmark/Entitas
 MiniEcs.Benchmark/bin
 MiniEcs.Benchmark/obj
+MiniEcs.Benchmark/LeoECS
+MiniEcs.Benchmark/Svelto.Common
+MiniEcs.Benchmark/Svelto.ECS

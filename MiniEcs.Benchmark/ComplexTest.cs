@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
 using Entitas;
 using MiniEcs.Core;
+using EcsEntity = MiniEcs.Core.EcsEntity;
+using EcsFilter = MiniEcs.Core.EcsFilter;
+using EcsWorld = MiniEcs.Core.EcsWorld;
 using EntitasEntity = Entitas.Entity;
 using EntitasWorld = Entitas.IContext<Entitas.Entity>;
 
@@ -30,22 +33,18 @@ namespace MiniEcs.Benchmark
 
         private class MiniEcsComponentA : IEcsComponent
         {
-            public byte Index => 0;
         }
 
         private class MiniEcsComponentB : IEcsComponent
         {
-            public byte Index => 1;
         }
 
         private class MiniEcsComponentC : IEcsComponent
         {
-            public byte Index => 2;
         }
 
         private class MiniEcsComponentD : IEcsComponent
         {
-            public byte Index => 3;
         }
         
         private EntitasWorld _entitasWorld;
@@ -55,8 +54,9 @@ namespace MiniEcs.Benchmark
         public void Setup()
         {
             _entitasWorld = new Context<EntitasEntity>(4, () => new EntitasEntity());
-            _world = new EcsWorld(4);
-            for (int i = 0; i < 10000; ++i)
+            _world = new EcsWorld();
+            
+            for (int i = 0; i < 1000; ++i)
             {
                 EntitasEntity entity = _entitasWorld.CreateEntity();
                 entity.AddComponent(0, new EntitasComponentA());
@@ -102,7 +102,7 @@ namespace MiniEcs.Benchmark
         {
             List<EntitasEntity> entities = new List<EntitasEntity>();
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 EntitasEntity entityABD = _entitasWorld.CreateEntity();
                 entityABD.AddComponent(0, new EntitasComponentA());
@@ -142,24 +142,9 @@ namespace MiniEcs.Benchmark
                 entities.Add(entityAD);
             }
 
-            foreach (Entity entity in _entitasWorld.GetGroup(Matcher<EntitasEntity>.AllOf(1).AnyOf(0, 2).NoneOf(3)))
+            foreach (Entity entity in _entitasWorld.GetGroup(Matcher<EntitasEntity>.AllOf(0).NoneOf(1, 3)))
             {
-                EntitasComponentB comp = (EntitasComponentB) entity.GetComponent(1);
-            }
-            
-            foreach (Entity entity in _entitasWorld.GetGroup(Matcher<EntitasEntity>.AllOf(0, 1)))
-            {
-                EntitasComponentA compA = (EntitasComponentA) entity.GetComponent(0);
-                EntitasComponentB compB = (EntitasComponentB) entity.GetComponent(1);
-            }
-            
-            foreach (Entity entity in _entitasWorld.GetGroup(Matcher<EntitasEntity>.AnyOf(0, 1)))
-            {
-            }
-            
-            foreach (Entity entity in _entitasWorld.GetGroup(Matcher<EntitasEntity>.AllOf(0).NoneOf(1)))
-            {
-                EntitasComponentA compA = (EntitasComponentA) entity.GetComponent(0);
+                EntitasComponentA comp = (EntitasComponentA) entity.GetComponent(0);
             }
 
             foreach (Entity entity in entities)
@@ -173,7 +158,7 @@ namespace MiniEcs.Benchmark
         {
             List<EcsEntity> entities = new List<EcsEntity>();
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 EcsEntity entityABD = _world.CreateEntity(new MiniEcsComponentA(), new MiniEcsComponentB(), new MiniEcsComponentD());
                 EcsEntity entityAC = _world.CreateEntity(new MiniEcsComponentA(), new MiniEcsComponentC());
@@ -192,24 +177,9 @@ namespace MiniEcs.Benchmark
                 entities.Add(entityAD);
             }
 
-            foreach (EcsEntity entity in _world.Filter(new EcsFilter().AllOf(1).AnyOf(0, 2).NoneOf(3)))
+            foreach (EcsEntity entity in _world.Filter(new EcsFilter().AllOf<MiniEcsComponentA>().NoneOf<MiniEcsComponentB, MiniEcsComponentD>()))
             {
-                MiniEcsComponentB comp = (MiniEcsComponentB) entity[1];
-            }
-            
-            foreach (EcsEntity entity in _world.Filter(new EcsFilter().AllOf(0, 1)))
-            {
-                MiniEcsComponentA compA = (MiniEcsComponentA) entity[0];
-                MiniEcsComponentB compB = (MiniEcsComponentB) entity[1];
-            }
-            
-            foreach (EcsEntity entity in _world.Filter(new EcsFilter().AnyOf(0, 1)))
-            {
-            }
-            
-            foreach (EcsEntity entity in _world.Filter(new EcsFilter().AllOf(0).NoneOf(1)))
-            {
-                MiniEcsComponentA compA = (MiniEcsComponentA) entity[0];
+                MiniEcsComponentA comp = entity.GetComponent<MiniEcsComponentA>();
             }
 
             foreach (EcsEntity entity in entities)

@@ -6,10 +6,11 @@ namespace MiniEcs.Core
     /// <summary>
     /// Methods to maintain effective comparison of entities for equality.
     /// </summary>
-    public class EntityComparer : IEqualityComparer<EcsEntity> 
+    public class EntityComparer : IEqualityComparer<EcsEntity>
     {
         public static readonly IEqualityComparer<EcsEntity> Comparer = new EntityComparer();
-        public bool Equals(EcsEntity entityA, EcsEntity entityB) 
+
+        public bool Equals(EcsEntity entityA, EcsEntity entityB)
         {
             return entityA.Id == entityB.Id;
         }
@@ -19,7 +20,7 @@ namespace MiniEcs.Core
             return (int) entity.Id;
         }
     }
-    
+
     /// <summary>
     /// An archetype is a unique combination of component types.
     /// <see cref="EcsWorld"/> uses the archetype to group all objects
@@ -31,7 +32,7 @@ namespace MiniEcs.Core
         /// Archetype unique identifier
         /// </summary>
         public int Id { get; }
-        
+
         /// <summary>
         /// Number of unique combinations of component types
         /// </summary>
@@ -47,22 +48,22 @@ namespace MiniEcs.Core
             Id = id;
             Indices = indices;
         }
-        
+
         /// <summary>
         /// Unique combinations of component types
         /// </summary>
         public readonly byte[] Indices;
-        
+
         /// <summary>
         /// Set of entities corresponding to archetype
         /// </summary>
         public readonly HashSet<EcsEntity> Entities = new HashSet<EcsEntity>(EntityComparer.Comparer);
-        
+
         /// <summary>
         /// Transitions to the next archetype when adding a new type of component
         /// </summary>
         public readonly Dictionary<byte, EcsArchetype> Next = new Dictionary<byte, EcsArchetype>();
-        
+
         /// <summary>
         /// Transitions to the previous archetype when deleting an existing component type
         /// </summary>
@@ -72,7 +73,7 @@ namespace MiniEcs.Core
         /// Returns an enumerator of all entities of a given archetype
         /// </summary>
         /// <returns>Enumerator of entities</returns>
-        public HashSet<EcsEntity>.Enumerator GetEnumerator() 
+        public HashSet<EcsEntity>.Enumerator GetEnumerator()
         {
             return Entities.GetEnumerator();
         }

@@ -14,7 +14,7 @@ namespace MiniEcs.Core.Systems
     {
         public SystemSorterException(string message) : base(message)
         {
-            
+
         }
     }
 

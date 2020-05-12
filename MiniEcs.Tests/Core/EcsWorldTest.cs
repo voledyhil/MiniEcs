@@ -6,6 +6,22 @@ using MiniEcs.Core;
 
 namespace MiniEcs.Tests.Core
 {
+ 
+    public class ComponentA : IEcsComponent
+    {
+    }
+
+    public class ComponentB : IEcsComponent
+    {
+    }
+
+    public class ComponentC : IEcsComponent
+    {
+    }
+
+    public class ComponentD : IEcsComponent
+    {
+    }
     
     [TestClass]
     public class EcsWorldTest
@@ -22,7 +38,7 @@ namespace MiniEcs.Tests.Core
         [ClassInitialize]
         public static void InitFilterWorld(TestContext testContext)
         {
-            _world = new EcsWorld(ComponentType.TotalComponents);
+            _world = new EcsWorld();
 
             _entityABD = _world.CreateEntity(new ComponentA(), new ComponentB(), new ComponentD());
             _entityAC = _world.CreateEntity(new ComponentA(), new ComponentC());
@@ -60,27 +76,27 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void GetSetRemoveComponentTest()
         {
-            EcsWorld world = new EcsWorld(ComponentType.TotalComponents);
+            EcsWorld world = new EcsWorld();
             
             ComponentB componentB = new ComponentB();
             EcsEntity entity = world.CreateEntity();
-            entity[ComponentType.A] = new ComponentA();
-            entity[ComponentType.B] = componentB;
-            entity[ComponentType.C] = new ComponentC();
+            entity.AddComponent(new ComponentA());
+            entity.AddComponent(componentB);
+            entity.AddComponent(new ComponentC());
 
-            Assert.IsNotNull(entity[ComponentType.A]);
-            Assert.IsNotNull(entity[ComponentType.C]);
-            Assert.AreEqual(componentB, entity[ComponentType.B]);
-            Assert.IsNull(entity[ComponentType.D]);
+            Assert.IsNotNull(entity.GetComponent<ComponentA>());
+            Assert.IsNotNull(entity.GetComponent<ComponentC>());
+            Assert.AreEqual(componentB, entity.GetComponent<ComponentB>());
+            Assert.IsFalse(entity.HasComponent<ComponentD>());
 
-            entity[ComponentType.B] = null;
-            Assert.IsNull(entity[ComponentType.B]);
+            entity.RemoveComponent<ComponentB>();
+            Assert.IsFalse(entity.HasComponent<ComponentB>());
         }
 
         [TestMethod]
         public void AllFilterTest()
         {
-            IEcsGroup group = _world.Filter(new EcsFilter().AllOf(ComponentType.B));
+            IEcsGroup group = _world.Filter(new EcsFilter().AllOf<ComponentB>());
             List<EcsEntity> entities = group.ToList();
             Assert.AreEqual(5, entities.Count);
             Assert.AreEqual(5, group.CalculateCount());
@@ -91,7 +107,7 @@ namespace MiniEcs.Tests.Core
             Assert.IsTrue(entities.Contains(_entityBC));
             Assert.IsTrue(entities.Contains(_entityAB));
 
-            group = _world.Filter(new EcsFilter().AllOf(ComponentType.B, ComponentType.D));
+            group = _world.Filter(new EcsFilter().AllOf<ComponentB, ComponentD>());
             entities = group.ToList();
             Assert.AreEqual(3, group.CalculateCount());
             Assert.AreEqual(3, entities.Count);
@@ -105,7 +121,7 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void AnyFilterTest()
         {
-            IEcsGroup group = _world.Filter(new EcsFilter().AnyOf(ComponentType.B));
+            IEcsGroup group = _world.Filter(new EcsFilter().AllOf<ComponentB>());
             List<EcsEntity> entities = group.ToList();
             Assert.AreEqual(5, entities.Count);
             Assert.AreEqual(5, group.CalculateCount());
@@ -116,7 +132,7 @@ namespace MiniEcs.Tests.Core
             Assert.IsTrue(entities.Contains(_entityBC));
             Assert.IsTrue(entities.Contains(_entityAB));
 
-            group = _world.Filter(new EcsFilter().AnyOf(ComponentType.B, ComponentType.D));
+            group = _world.Filter(new EcsFilter().AnyOf<ComponentB, ComponentD>());
             entities = group.ToList();
             Assert.AreEqual(6, entities.Count);
             Assert.AreEqual(6, group.CalculateCount());
@@ -132,25 +148,26 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void NoneFilterTest()
         {
-            List<EcsEntity> entities = _world.Filter(new EcsFilter().NoneOf(ComponentType.B, ComponentType.D)).ToList();
+            List<EcsEntity> entities = _world.Filter(new EcsFilter().NoneOf<ComponentB, ComponentD>()).ToList();
             Assert.AreEqual(1, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityAC));
             
-            entities = _world.Filter(new EcsFilter().NoneOf(ComponentType.B, ComponentType.D, ComponentType.B)).ToList();
+            entities = _world.Filter(new EcsFilter().NoneOf<ComponentB, ComponentD, ComponentB>()).ToList();
             Assert.AreEqual(1, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityAC));
         }
       
+        
         [TestMethod]
         public void AllAnyFilterTest()
         {
-            List<EcsEntity> entities = _world.Filter(new EcsFilter().AllOf(ComponentType.B, ComponentType.B, ComponentType.D).AnyOf(ComponentType.A)).ToList();
+            List<EcsEntity> entities = _world.Filter(new EcsFilter().AllOf<ComponentB, ComponentB, ComponentD>().AnyOf<ComponentA>()).ToList();
             Assert.AreEqual(1, entities.Count);
             Assert.IsTrue(entities.Contains(_entityABD));
             
-            entities = _world.Filter(new EcsFilter().AllOf(ComponentType.D, ComponentType.D).AnyOf(ComponentType.B, ComponentType.C, ComponentType.C)).ToList();
+            entities = _world.Filter(new EcsFilter().AllOf<ComponentD, ComponentD>().AnyOf<ComponentB, ComponentC, ComponentC>()).ToList();
             Assert.AreEqual(3, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityABD));
@@ -162,14 +179,14 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void AllNoneFilterTest()
         {
-            List<EcsEntity> entities = _world.Filter(new EcsFilter().AllOf(ComponentType.B).NoneOf(ComponentType.A)).ToList();
+            List<EcsEntity> entities = _world.Filter(new EcsFilter().AllOf<ComponentB>().NoneOf<ComponentA>()).ToList();
             Assert.AreEqual(3, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityBD0));
             Assert.IsTrue(entities.Contains(_entityBD1));
             Assert.IsTrue(entities.Contains(_entityBC));
             
-            entities = _world.Filter(new EcsFilter().AllOf(ComponentType.B, ComponentType.D).NoneOf(ComponentType.A)).ToList();
+            entities = _world.Filter(new EcsFilter().AllOf<ComponentB, ComponentD>().NoneOf<ComponentA>()).ToList();
             Assert.AreEqual(2, entities.Count);
             
             Assert.IsTrue(entities.Contains(_entityBD0));
@@ -179,17 +196,17 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void GroupIncVersionFilterTest()
         {
-            EcsWorld world = new EcsWorld(ComponentType.TotalComponents);            
+            EcsWorld world = new EcsWorld();            
             EcsEntity entity = world.CreateEntity(new ComponentA(), new ComponentB());
 
-            List<EcsEntity> entities = world.Filter(new EcsFilter().AllOf(ComponentType.B)).ToList();
+            List<EcsEntity> entities = world.Filter(new EcsFilter().AllOf<ComponentB>()).ToList();
             Assert.AreEqual(1, entities.Count);
             
-            entity[ComponentType.C] = new ComponentC();
+            entity.AddComponent(new ComponentC());
             
             world.CreateEntity(new ComponentC(), new ComponentD());
             
-            entities = world.Filter(new EcsFilter().AllOf(ComponentType.B)).ToList();
+            entities = world.Filter(new EcsFilter().AllOf<ComponentB>()).ToList();
             Assert.AreEqual(1, entities.Count);
         }
 
@@ -197,10 +214,10 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void GetOrCreateSingletonTest()
         {
-            EcsWorld world = new EcsWorld(ComponentType.TotalComponents);
+            EcsWorld world = new EcsWorld();
 
-            ComponentA componentA0 = world.GetOrCreateSingleton<ComponentA>(ComponentType.A);
-            ComponentA componentA1 = world.GetOrCreateSingleton<ComponentA>(ComponentType.A);
+            ComponentA componentA0 = world.GetOrCreateSingleton<ComponentA>();
+            ComponentA componentA1 = world.GetOrCreateSingleton<ComponentA>();
             
             Assert.AreEqual(componentA0, componentA1);
         }
@@ -208,7 +225,7 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void CreateEntityFromProcessingTest()
         {
-            EcsWorld world = new EcsWorld(ComponentType.TotalComponents);
+            EcsWorld world = new EcsWorld();
             Assert.AreEqual(0, world.EntitiesInProcessing);
 
             EcsEntity entity = world.CreateEntity(new ComponentA());
@@ -220,40 +237,29 @@ namespace MiniEcs.Tests.Core
             uint newEntityId = newEntity.Id;
             Assert.AreEqual(0, world.EntitiesInProcessing);
             
-            Assert.IsFalse(newEntity.HasComponent(ComponentType.A));
-            Assert.IsTrue(newEntity.HasComponent(ComponentType.B));
+            Assert.IsFalse(newEntity.HasComponent<ComponentA>());
+            Assert.IsTrue(newEntity.HasComponent<ComponentB>());
 
             Assert.IsTrue(newEntityId > entityId);
         }
-
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void AddComponentThrowExceptionTest()
         {
-            EcsWorld world = new EcsWorld(ComponentType.TotalComponents);
+            EcsWorld world = new EcsWorld();
             EcsEntity entity = world.CreateEntity();
-            entity[ComponentType.A] = new ComponentA();
-            entity[ComponentType.A] = new ComponentA();
+            entity.AddComponent(new ComponentA());
+            entity.AddComponent(new ComponentA());
         }
         
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void AddComponentThrowExceptionTest2()
-        {
-            EcsWorld world = new EcsWorld(ComponentType.TotalComponents);
-            EcsEntity entity = world.CreateEntity();
-            entity[ComponentType.A] = new ComponentB();
-        }
-        
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void RemoveComponentThrowExceptionTest()
         {
-            EcsWorld world = new EcsWorld(ComponentType.TotalComponents);
+            EcsWorld world = new EcsWorld();
             EcsEntity entity = world.CreateEntity();
-            entity[ComponentType.A] = null;
+            entity.RemoveComponent<ComponentA>();
         }
-
     }
 }

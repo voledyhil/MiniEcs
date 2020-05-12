@@ -75,7 +75,7 @@ namespace MiniEcs.Core.Systems
             Type = type;
         }
     }
-    
+
     /// <summary>
     /// Interface for all systems and systems groups
     /// </summary>

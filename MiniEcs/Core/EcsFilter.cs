@@ -19,9 +19,43 @@ namespace MiniEcs.Core
         /// <summary>
         /// At least one of the component types in this array must exist in the archetype
         /// </summary>
+        /// <typeparam name="T0">Component type</typeparam>
+        /// <returns>Current filter</returns>
+        public EcsFilter AnyOf<T0>() where T0 : IEcsComponent
+        {
+            return AnyOf(EcsComponentType<T0>.Index);
+        }
+
+        /// <summary>
+        /// At least one of the component types in this array must exist in the archetype
+        /// </summary>
+        /// <typeparam name="T0">Component type</typeparam>
+        /// <typeparam name="T1">Component type</typeparam>
+        /// <returns></returns>
+        public EcsFilter AnyOf<T0, T1>() where T0 : IEcsComponent where T1 : IEcsComponent
+        {
+            return AnyOf(EcsComponentType<T0>.Index, EcsComponentType<T1>.Index);
+        }
+
+        /// <summary>
+        /// At least one of the component types in this array must exist in the archetype
+        /// </summary>
+        /// <typeparam name="T0">Component type</typeparam>
+        /// <typeparam name="T1">Component type</typeparam>
+        /// <typeparam name="T2">Component type</typeparam>
+        /// <returns>Current filter</returns>
+        public EcsFilter AnyOf<T0, T1, T2>() where T0 : IEcsComponent where T1 : IEcsComponent where T2 : IEcsComponent
+        {
+            return AnyOf(EcsComponentType<T0>.Index, EcsComponentType<T1>.Index, EcsComponentType<T2>.Index);
+        }
+
+
+        /// <summary>
+        /// At least one of the component types in this array must exist in the archetype
+        /// </summary>
         /// <param name="types">Combinations of component types</param>
         /// <returns>Current filter</returns>
-        public EcsFilter AnyOf(params byte[] types)
+        private EcsFilter AnyOf(params byte[] types)
         {
             Any = Any ?? new HashSet<byte>();
             foreach (byte type in types)
@@ -36,9 +70,60 @@ namespace MiniEcs.Core
         /// <summary>
         /// All component types in this array must exist in the archetype
         /// </summary>
+        /// <typeparam name="T0">Component type</typeparam>
+        /// <returns>Current filter</returns>
+        public EcsFilter AllOf<T0>() where T0 : IEcsComponent
+        {
+            return AllOf(EcsComponentType<T0>.Index);
+        }
+
+        /// <summary>
+        /// All component types in this array must exist in the archetype
+        /// </summary>
+        /// <typeparam name="T0">Component type</typeparam>
+        /// <typeparam name="T1">Component type</typeparam>
+        /// <returns>Current filter</returns>
+        public EcsFilter AllOf<T0, T1>() where T0 : IEcsComponent where T1 : IEcsComponent
+        {
+            return AllOf(EcsComponentType<T0>.Index, EcsComponentType<T1>.Index);
+        }
+
+        /// <summary>
+        /// All component types in this array must exist in the archetype
+        /// </summary>
+        /// <typeparam name="T0">Component type</typeparam>
+        /// <typeparam name="T1">Component type</typeparam>
+        /// <typeparam name="T2">Component type</typeparam>
+        /// <returns>Current filter</returns>
+        public EcsFilter AllOf<T0, T1, T2>() where T0 : IEcsComponent where T1 : IEcsComponent where T2 : IEcsComponent
+        {
+            return AllOf(EcsComponentType<T0>.Index, EcsComponentType<T1>.Index, EcsComponentType<T2>.Index);
+        }
+
+        /// <summary>
+        /// All component types in this array must exist in the archetype
+        /// </summary>
+        /// <typeparam name="T0">Component type</typeparam>
+        /// <typeparam name="T1">Component type</typeparam>
+        /// <typeparam name="T2">Component type</typeparam>
+        /// <typeparam name="T3">Component type</typeparam>
+        /// <returns>Current filter</returns>
+        public EcsFilter AllOf<T0, T1, T2, T3>() where T0 : IEcsComponent
+            where T1 : IEcsComponent
+            where T2 : IEcsComponent
+            where T3 : IEcsComponent
+        {
+            return AllOf(EcsComponentType<T0>.Index, EcsComponentType<T1>.Index, EcsComponentType<T2>.Index,
+                EcsComponentType<T3>.Index);
+        }
+
+
+        /// <summary>
+        /// All component types in this array must exist in the archetype
+        /// </summary>
         /// <param name="types">Combinations of component types</param>
         /// <returns>Current filter</returns>
-        public EcsFilter AllOf(params byte[] types)
+        private EcsFilter AllOf(params byte[] types)
         {
             All = All ?? new HashSet<byte>();
             foreach (byte type in types)
@@ -53,9 +138,42 @@ namespace MiniEcs.Core
         /// <summary>
         /// None of the component types in this array can exist in the archetype
         /// </summary>
+        /// <typeparam name="T0">Component type</typeparam>
+        /// <returns>Current filter</returns>
+        public EcsFilter NoneOf<T0>() where T0 : IEcsComponent
+        {
+            return NoneOf(EcsComponentType<T0>.Index);
+        }
+
+        /// <summary>
+        /// None of the component types in this array can exist in the archetype 
+        /// </summary>
+        /// <typeparam name="T0">Component type</typeparam>
+        /// <typeparam name="T1">Component type</typeparam>
+        /// <returns>Current filter</returns>
+        public EcsFilter NoneOf<T0, T1>() where T0 : IEcsComponent where T1 : IEcsComponent
+        {
+            return NoneOf(EcsComponentType<T0>.Index, EcsComponentType<T1>.Index);
+        }
+
+        /// <summary>
+        /// None of the component types in this array can exist in the archetype
+        /// </summary>
+        /// <typeparam name="T0">Component type</typeparam>
+        /// <typeparam name="T1">Component type</typeparam>
+        /// <typeparam name="T2">Component type</typeparam>
+        /// <returns>Current filter</returns>
+        public EcsFilter NoneOf<T0, T1, T2>() where T0 : IEcsComponent where T1 : IEcsComponent where T2 : IEcsComponent
+        {
+            return NoneOf(EcsComponentType<T0>.Index, EcsComponentType<T1>.Index, EcsComponentType<T2>.Index);
+        }
+
+        /// <summary>
+        /// None of the component types in this array can exist in the archetype
+        /// </summary>
         /// <param name="types">Combinations of component types</param>
         /// <returns>Current filter</returns>
-        public EcsFilter NoneOf(params byte[] types)
+        private EcsFilter NoneOf(params byte[] types)
         {
             None = None ?? new HashSet<byte>();
             foreach (byte type in types)
