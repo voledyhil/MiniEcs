@@ -7,42 +7,21 @@ A solution based on archetypes does not require iterating over all entities and 
 ### World
 The EcsWorld class acts as a manager for creating an entity, selecting a collection of specific archetypes, and then retrieving entities.
 
-Declare Components
+### Declare Components
 ```csharp
-public static class ComponentType
-{
-    public const byte A = 0;
-    public const byte B = 1;
-    public const byte C = 2;
-    public const byte D = 3;
 
-    public const byte TotalComponents = 4;
-}
+public class ComponentA : IEcsComponent { }
 
-public class ComponentA : IEcsComponent
-{
-    public byte Index => ComponentType.A;
-}
+public class ComponentB : IEcsComponent { }
 
-public class ComponentB : IEcsComponent
-{
-    public byte Index => ComponentType.B;
-}
+public class ComponentC : IEcsComponent { }
 
-public class ComponentC : IEcsComponent
-{
-    public byte Index => ComponentType.C;
-}
-
-public class ComponentD : IEcsComponent
-{
-    public byte Index => ComponentType.D;
-}
+public class ComponentD : IEcsComponent { }
 ```    
 Create world
 
 ```csharp
-var world = new EcsWorld(ComponentType.TotalComponents);
+var world = new EcsWorld();
 ``` 
 ### Entity
 An entity is a collection of unique components
@@ -60,11 +39,11 @@ entityAB.Destroy()
 ### Component
 Add component to entity
 ```csharp
-entityAB[ComponentType.C] = new ComponentC();
+entityAB.AddComponent(new ComponentC());
 ``` 
 Remove component from entity 
 ```csharp
-entityAB[ComponentType.C] = null;
+entityAB.RemoveComponent<ComponentC>();
 ``` 
 ### Filter
 Query defines the set of component types that an archetype must contain in order for its entities to be included in the view. You can also exclude archetypes that contain specific types of components.
@@ -73,7 +52,7 @@ Create Filter
 ```csharp
 // Searched archetypes must have components of type "B" and "D", 
 // but component "A" must be missing
-var filterBDnA = new EcsFilter().AllOf(ComponentType.B, ComponentType.D).NoneOf(ComponentType.A)
+var filterBDnA = new EcsFilter().AllOf<ComponentB, ComponentD>().NoneOf<ComponentA>();
 ```
 ### Group
 Collection of archetypes matching filter criteria
@@ -95,8 +74,8 @@ Enumerate Entities
 ```csharp
 foreach (var entity in group))
 {
-    var compB = (ComponentB) entity[ComponentType.B];
-    var compD = (ComponentD) entity[ComponentType.D];
+    var compB = entity.GetComponent<ComponentB>();
+    var compD = entity.GetComponent<ComponentD>();
 }
 ```
 ### Systems
@@ -109,14 +88,14 @@ public class SystemBD : IEcsSystem
     private EcsFilter _filterBDnA;
     public SystemBD()
     {
-        _filterBDnA = new EcsFilter().AllOf(ComponentType.B, ComponentType.D).NoneOf(ComponentType.A)
+        _filterBDnA = new EcsFilter().AllOf<ComponentB, ComponentD>().NoneOf<ComponentA>();
     }
     public void Update(float deltaTime, EcsWorld world)
     {
         foreach (var entity in world.Filter(_filterBDnA)))
         {
-            var compB = (ComponentB) entity[ComponentType.B];
-            var compD = (ComponentD) entity[ComponentType.D];
+            var compB = entity.GetComponent<ComponentB>();
+            var compD = entity.GetComponent<ComponentD>();
         }
     }
 }
@@ -184,10 +163,10 @@ Intel Core i7-8850H CPU 2.60GHz (Coffee Lake), 1 CPU, 12 logical and 6 physical 
   [Host]     : .NET Core 2.2.5 (CoreCLR 4.6.27617.05, CoreFX 4.6.27618.01), X64 RyuJIT
   DefaultJob : .NET Core 2.2.5 (CoreCLR 4.6.27617.05, CoreFX 4.6.27618.01), X64 RyuJIT
 ```
-|            Method |      Mean |     Error |    StdDev |    Gen 0 |   Gen 1 | Gen 2 | Allocated |
-|------------------ |----------:|----------:|----------:|---------:|--------:|------:|----------:|
-| EntitasStressTest | 16.045 ms | 0.3156 ms | 0.3508 ms |  62.5000 | 31.2500 |     - | 480.82 KB |
-| MiniEcsStressTest |  9.275 ms | 0.0571 ms | 0.0506 ms | 156.2500 | 15.6250 |     - | 764.34 KB |
+|            Method |     Mean |   Error |   StdDev |   Gen 0 |  Gen 1 | Gen 2 | Allocated |
+|------------------ |---------:|--------:|---------:|--------:|-------:|------:|----------:|
+| EntitasStressTest | 508.0 us | 9.94 us | 13.27 us |  7.8125 | 2.9297 |     - |  51.64 KB |
+| MiniEcsStressTest | 211.4 us | 2.76 us |  2.44 us | 11.2305 |      - |     - |  52.27 KB |
 
 ## References
 1. Building an ECS #2: Archetypes and Vectorization (https://medium.com/@ajmmertens/building-an-ecs-2-archetypes-and-vectorization-fe21690805f9)
