@@ -165,8 +165,8 @@ Intel Core i7-8850H CPU 2.60GHz (Coffee Lake), 1 CPU, 12 logical and 6 physical 
 ```
 |            Method |     Mean |   Error |   StdDev |   Gen 0 |  Gen 1 | Gen 2 | Allocated |
 |------------------ |---------:|--------:|---------:|--------:|-------:|------:|----------:|
-| EntitasStressTest | 508.0 us | 9.94 us | 13.27 us |  7.8125 | 2.9297 |     - |  51.64 KB |
-| MiniEcsStressTest | 211.4 us | 2.76 us |  2.44 us | 11.2305 |      - |     - |  52.27 KB |
+| EntitasStressTest | 494.9 us | 9.70 us | 10.79 us |  7.8125 | 2.9297 |     - |  51.64 KB |
+| MiniEcsStressTest | 157.7 us | 0.94 us |  1.04 us | 11.2305 | 0.4883 |     - |  52.27 KB |
 
 ## References
 1. Building an ECS #2: Archetypes and Vectorization (https://medium.com/@ajmmertens/building-an-ecs-2-archetypes-and-vectorization-fe21690805f9)
