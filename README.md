@@ -175,7 +175,7 @@ Implementing a simple 2D isometric physical using MiniEcs framework
 
 ### Stress Test
 
-The [test](https://github.com/voledyhil/MiniEcs/blob/master/MiniEcs.Benchmark/ComplexTest.cs) involves creating, filtering, and deleting thousands of entities.
+The [test](https://github.com/voledyhil/MiniEcs/blob/master/MiniEcs.Benchmark/ComplexTest.cs) involves creating, filtering, and deleting entities.
 
 ```
 BenchmarkDotNet=v0.12.1, OS=macOS Mojave 10.14.6 (18G2022) [Darwin 18.7.0]
@@ -188,14 +188,6 @@ Intel Core i7-8850H CPU 2.60GHz (Coffee Lake), 1 CPU, 12 logical and 6 physical 
 |------------------ |----------:|----------:|----------:|---------:|--------:|------:|----------:|
 | EntitasStressTest | 16.045 ms | 0.3156 ms | 0.3508 ms |  62.5000 | 31.2500 |     - | 480.82 KB |
 | MiniEcsStressTest |  9.275 ms | 0.0571 ms | 0.0506 ms | 156.2500 | 15.6250 |     - | 764.34 KB |
-
-### TODO
-
--~~Caching Destroyed Entities~~
-- Extending EcsWorld, EcsEntity, and EcsSystem Interfaces
-- Transition from AoS (array of structures) to SoA (struct of arrays) PERFORMANCE!
-- Binary serialization, deserialization, div compression
-
 
 ## References
 1. Building an ECS #2: Archetypes and Vectorization (https://medium.com/@ajmmertens/building-an-ecs-2-archetypes-and-vectorization-fe21690805f9)
