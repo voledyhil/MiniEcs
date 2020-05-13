@@ -103,7 +103,7 @@ public class SystemBD : IEcsSystem
     }
     public void Update(float deltaTime, EcsWorld world)
     {
-        world.Filter(filterBDnA).ForEach((IEcsEntity entity, ComponentB compB, ComponentD compD) =>
+        world.Filter(_filterBDnA).ForEach((IEcsEntity entity, ComponentB compB, ComponentD compD) =>
         {
             compB.Value++;
             compD.Value++;
