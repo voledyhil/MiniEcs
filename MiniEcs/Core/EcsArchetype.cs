@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace MiniEcs.Core
 {
@@ -22,12 +23,21 @@ namespace MiniEcs.Core
         /// <summary>
         /// Number entities in archetype
         /// </summary>
-        public int EntitiesCount => _count;
+        public int EntitiesCount
+        {
+            get
+            {
+                RemoveHoles();
+                return _length;
+            }
+        }
         
         /// <summary>
         /// Unique combinations of component types
         /// </summary>
         public readonly byte[] Indices;
+
+        public readonly HashSet<byte> SetIndices;
 
         /// <summary>
         /// Transitions to the next archetype when adding a new type of component
@@ -38,12 +48,22 @@ namespace MiniEcs.Core
         /// Transitions to the previous archetype when deleting an existing component type
         /// </summary>
         public readonly EcsArchetype[] Prior = new EcsArchetype[byte.MaxValue];
-
+        
+        public EcsComponentPool<T> GetComponentPool<T>() where T : IEcsComponent
+        {
+            return (EcsComponentPool<T>) _componentPools[EcsComponentType<T>.Index];
+        } 
+        
+        public IEcsComponentPool GetComponentPool(byte index)
+        {
+            return _componentPools[index];
+        } 
         
         private int _length;
         private int _count;
         private int _freeIndex = int.MaxValue;
         private EcsEntity[] _entities = new EcsEntity[1];
+        private readonly IEcsComponentPool[] _componentPools = new IEcsComponentPool[byte.MaxValue];
 
         /// <summary>
         /// Сreates a new archetype
@@ -54,6 +74,13 @@ namespace MiniEcs.Core
         {
             Id = id;
             Indices = indices;
+            SetIndices = new HashSet<byte>(indices);
+
+            foreach (byte index in indices)
+            {
+                IEcsComponentPoolCreator creator = EcsComponentTypeManager.ComponentPoolCreators[index];
+                _componentPools[index] = creator.InstantiatePool();
+            }
         }
         
         /// <summary>
@@ -82,6 +109,11 @@ namespace MiniEcs.Core
             _count++;
         }
 
+        public void AddComponent(byte index, IEcsComponent component)
+        {
+            _componentPools[index].AddComponent(_length, component);
+        }
+
         /// <summary>
         /// Remove entity from archetype
         /// </summary>
@@ -89,6 +121,11 @@ namespace MiniEcs.Core
         public void RemoveEntity(EcsEntity entity)
         {
             _entities[entity.ArchetypeIndex] = null;
+            for (int i = 0; i < IndicesCount; i++)
+            {
+                _componentPools[Indices[i]].Remove(entity.ArchetypeIndex);
+            }
+            
             _freeIndex = Math.Min(_freeIndex, entity.ArchetypeIndex);
             _count--;
 
@@ -120,9 +157,19 @@ namespace MiniEcs.Core
                 if (current >= _length)
                     continue;
 
-                EcsEntity entity = _entities[current++];
+                EcsEntity entity = _entities[current];
                 entity.ArchetypeIndex = _freeIndex;
-                _entities[_freeIndex++] = entity;
+                
+                _entities[_freeIndex] = entity;
+                _entities[current] = null;
+
+                for (int i = 0; i < IndicesCount; i++)
+                {
+                    _componentPools[Indices[i]].Replace(_freeIndex, current);
+                }
+
+                current++;
+                _freeIndex++;
             }
 
             _length = _freeIndex;

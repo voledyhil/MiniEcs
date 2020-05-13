@@ -73,101 +73,145 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void AllFilterTest()
         {
-            IEcsGroup group = _world.Filter(new EcsFilter().AllOf<ComponentB>());
-            List<IEcsEntity> entities = group.ToList();
-            Assert.AreEqual(5, entities.Count);
-            Assert.AreEqual(5, group.CalculateCount());
-            
-            Assert.IsTrue(entities.Contains(_entityABD));
-            Assert.IsTrue(entities.Contains(_entityBD0));
-            Assert.IsTrue(entities.Contains(_entityBD1));
-            Assert.IsTrue(entities.Contains(_entityBC));
-            Assert.IsTrue(entities.Contains(_entityAB));
+            List<IEcsEntity> entities = new List<IEcsEntity>
+            {
+                _entityABD, _entityBD0, _entityBD1, _entityBC, _entityAB
+            };
 
-            group = _world.Filter(new EcsFilter().AllOf<ComponentB, ComponentD>());
-            entities = group.ToList();
-            Assert.AreEqual(3, group.CalculateCount());
-            Assert.AreEqual(3, entities.Count);
+            IEcsGroup group = _world.Filter(new EcsFilter().AllOf<ComponentB>());
+            Assert.AreEqual(entities.Count, group.CalculateCount());
+            group.ForEach((IEcsEntity entity, ComponentB compB) =>
+            {
+                Assert.IsTrue(entities.Contains(entity));
+            });
+
             
-            Assert.IsTrue(entities.Contains(_entityABD));
-            Assert.IsTrue(entities.Contains(_entityBD0));
-            Assert.IsTrue(entities.Contains(_entityBD1));
+            entities = new List<IEcsEntity>
+            {
+                _entityABD, _entityBD0, _entityBD1
+            };
+            
+            group = _world.Filter(new EcsFilter().AllOf<ComponentB, ComponentD>());
+            Assert.AreEqual(3, group.CalculateCount());            
+            group.ForEach((IEcsEntity entity, ComponentB compB, ComponentD compD) =>
+            {
+                Assert.IsTrue(entities.Contains(entity));
+            });
             
         }
 
         [TestMethod]
         public void AnyFilterTest()
         {
-            IEcsGroup group = _world.Filter(new EcsFilter().AllOf<ComponentB>());
-            List<IEcsEntity> entities = group.ToList();
-            Assert.AreEqual(5, entities.Count);
-            Assert.AreEqual(5, group.CalculateCount());
-            
-            Assert.IsTrue(entities.Contains(_entityABD));
-            Assert.IsTrue(entities.Contains(_entityBD0));
-            Assert.IsTrue(entities.Contains(_entityBD1));
-            Assert.IsTrue(entities.Contains(_entityBC));
-            Assert.IsTrue(entities.Contains(_entityAB));
+            List<IEcsEntity> entities = new List<IEcsEntity>
+            {
+                _entityABD, _entityBD0, _entityBD1, _entityBC, _entityAB
+            };
 
-            group = _world.Filter(new EcsFilter().AnyOf<ComponentB, ComponentD>());
-            entities = group.ToList();
-            Assert.AreEqual(6, entities.Count);
-            Assert.AreEqual(6, group.CalculateCount());
+            IEcsGroup group = _world.Filter(new EcsFilter().AnyOf<ComponentB>());
+            Assert.AreEqual(entities.Count, group.CalculateCount());
+            group.ForEach((IEcsEntity entity, ComponentB compB) =>
+            {
+                Assert.IsTrue(entities.Contains(entity));
+            });
             
-            Assert.IsTrue(entities.Contains(_entityABD));
-            Assert.IsTrue(entities.Contains(_entityBD0));
-            Assert.IsTrue(entities.Contains(_entityBD1));
-            Assert.IsTrue(entities.Contains(_entityBC));
-            Assert.IsTrue(entities.Contains(_entityAB));
-            Assert.IsTrue(entities.Contains(_entityAD));
+             
+            entities = new List<IEcsEntity>
+            {
+                _entityABD, _entityBD0, _entityBD1, _entityBC, _entityAB, _entityAD
+            };
+            
+            group = _world.Filter(new EcsFilter().AnyOf<ComponentB, ComponentD>());
+            Assert.AreEqual(entities.Count, group.CalculateCount());            
+            group.ForEach(entity =>
+            {
+                Assert.IsTrue(entities.Contains(entity));
+            });
         }
         
         [TestMethod]
         public void NoneFilterTest()
         {
-            List<IEcsEntity> entities = _world.Filter(new EcsFilter().NoneOf<ComponentB, ComponentD>()).ToList();
-            Assert.AreEqual(1, entities.Count);
+            List<IEcsEntity> entities = new List<IEcsEntity>
+            {
+                _entityAC
+            };
+
+            IEcsGroup group = _world.Filter(new EcsFilter().NoneOf<ComponentB, ComponentD>());
+            Assert.AreEqual(entities.Count, group.CalculateCount());
+            group.ForEach(entity =>
+            {
+                Assert.IsTrue(entities.Contains(entity));
+            });
             
-            Assert.IsTrue(entities.Contains(_entityAC));
             
-            entities = _world.Filter(new EcsFilter().NoneOf<ComponentB, ComponentD, ComponentB>()).ToList();
-            Assert.AreEqual(1, entities.Count);
-            
-            Assert.IsTrue(entities.Contains(_entityAC));
+            group = _world.Filter(new EcsFilter().NoneOf<ComponentB, ComponentD, ComponentB>());
+            Assert.AreEqual(entities.Count, group.CalculateCount());
+            group.ForEach(entity =>
+            {
+                Assert.IsTrue(entities.Contains(entity));
+            });
         }
       
         
         [TestMethod]
         public void AllAnyFilterTest()
         {
-            List<IEcsEntity> entities = _world.Filter(new EcsFilter().AllOf<ComponentB, ComponentB, ComponentD>().AnyOf<ComponentA>()).ToList();
-            Assert.AreEqual(1, entities.Count);
-            Assert.IsTrue(entities.Contains(_entityABD));
+            List<IEcsEntity> entities = new List<IEcsEntity>
+            {
+                _entityABD
+            };
+
+            IEcsGroup group = _world.Filter(new EcsFilter().AllOf<ComponentB, ComponentB, ComponentD>().AnyOf<ComponentA>());
+            Assert.AreEqual(entities.Count, group.CalculateCount());
+            group.ForEach(entity =>
+            {
+                Assert.IsTrue(entities.Contains(entity));
+            });
             
-            entities = _world.Filter(new EcsFilter().AllOf<ComponentD, ComponentD>().AnyOf<ComponentB, ComponentC, ComponentC>()).ToList();
-            Assert.AreEqual(3, entities.Count);
             
-            Assert.IsTrue(entities.Contains(_entityABD));
-            Assert.IsTrue(entities.Contains(_entityBD0));
-            Assert.IsTrue(entities.Contains(_entityBD1));
+            entities = new List<IEcsEntity>
+            {
+                _entityABD, _entityBD0, _entityBD1
+            };
+            
+            group = _world.Filter(new EcsFilter().AllOf<ComponentD, ComponentD>().AnyOf<ComponentB, ComponentC, ComponentC>());
+            Assert.AreEqual(entities.Count, group.CalculateCount());            
+            group.ForEach(entity =>
+            {
+                Assert.IsTrue(entities.Contains(entity));
+            });
         }
         
   
         [TestMethod]
         public void AllNoneFilterTest()
         {
-            List<IEcsEntity> entities = _world.Filter(new EcsFilter().AllOf<ComponentB>().NoneOf<ComponentA>()).ToList();
-            Assert.AreEqual(3, entities.Count);
+            List<IEcsEntity> entities = new List<IEcsEntity>
+            {
+                _entityBD0, _entityBD1, _entityBC
+            };
+
+            IEcsGroup group = _world.Filter(new EcsFilter().AllOf<ComponentB>().NoneOf<ComponentA>());
+            Assert.AreEqual(entities.Count, group.CalculateCount());
+            group.ForEach((IEcsEntity entity, ComponentB compB) =>
+            {
+                Assert.IsTrue(entities.Contains(entity));
+            });
             
-            Assert.IsTrue(entities.Contains(_entityBD0));
-            Assert.IsTrue(entities.Contains(_entityBD1));
-            Assert.IsTrue(entities.Contains(_entityBC));
             
-            entities = _world.Filter(new EcsFilter().AllOf<ComponentB, ComponentD>().NoneOf<ComponentA>()).ToList();
-            Assert.AreEqual(2, entities.Count);
+                        
+            entities = new List<IEcsEntity>
+            {
+                _entityBD0, _entityBD1
+            };
             
-            Assert.IsTrue(entities.Contains(_entityBD0));
-            Assert.IsTrue(entities.Contains(_entityBD1));
+            group = _world.Filter(new EcsFilter().AllOf<ComponentB, ComponentD>().NoneOf<ComponentA>());
+            Assert.AreEqual(entities.Count, group.CalculateCount());            
+            group.ForEach(entity =>
+            {
+                Assert.IsTrue(entities.Contains(entity));
+            });
         }
         
         [TestMethod]
@@ -176,15 +220,13 @@ namespace MiniEcs.Tests.Core
             EcsWorld world = new EcsWorld();            
             IEcsEntity entity = world.CreateEntity(new ComponentA(), new ComponentB());
 
-            List<IEcsEntity> entities = world.Filter(new EcsFilter().AllOf<ComponentB>()).ToList();
-            Assert.AreEqual(1, entities.Count);
+            Assert.AreEqual(1, world.Filter(new EcsFilter().AllOf<ComponentB>()).CalculateCount());
             
             entity.AddComponent(new ComponentC());
             
             world.CreateEntity(new ComponentC(), new ComponentD());
             
-            entities = world.Filter(new EcsFilter().AllOf<ComponentB>()).ToList();
-            Assert.AreEqual(1, entities.Count);
+            Assert.AreEqual(1, world.Filter(new EcsFilter().AllOf<ComponentB>()).CalculateCount());
         }
 
         
