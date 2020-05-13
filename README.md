@@ -1,7 +1,8 @@
 # MiniEcs
 Very simple, lightweight Entity Component System platform based on archetype architecture.
 
-A solution based on archetypes does not require iterating over all entities and testing them to find out if they have the right components. Instead, we repeat all the archetypes that will be much smaller than the entities, then we return all the entities from the archetypes that are created for the set of components that contains the desired ones.
+A solution based on archetypes does not require iterating over all entities and testing them to find out if they have the right components. Instead, we repeat all archetypes that will be much smaller than entities, then return all entities from archetypes. <b>The engine does not cache entities!</b>
+
 ## Overview
 
 ### World
