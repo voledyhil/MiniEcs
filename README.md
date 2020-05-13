@@ -164,10 +164,10 @@ Intel Core i7-8850H CPU 2.60GHz (Coffee Lake), 1 CPU, 12 logical and 6 physical 
   [Host]     : .NET Core 2.2.5 (CoreCLR 4.6.27617.05, CoreFX 4.6.27618.01), X64 RyuJIT
   DefaultJob : .NET Core 2.2.5 (CoreCLR 4.6.27617.05, CoreFX 4.6.27618.01), X64 RyuJIT
 ```
-|            Method |     Mean |   Error |   StdDev |   Gen 0 |  Gen 1 | Gen 2 | Allocated |
-|------------------ |---------:|--------:|---------:|--------:|-------:|------:|----------:|
-| EntitasStressTest | 494.9 us | 9.70 us | 10.79 us |  7.8125 | 2.9297 |     - |  51.64 KB |
-| MiniEcsStressTest | 157.7 us | 0.94 us |  1.04 us | 11.2305 | 0.4883 |     - |  52.27 KB |
+|            Method |     Mean |    Error |   StdDev |   Gen 0 |  Gen 1 | Gen 2 | Allocated |
+|------------------ |---------:|---------:|---------:|--------:|-------:|------:|----------:|
+| EntitasStressTest | 540.7 us | 15.24 us | 42.24 us |  7.8125 | 1.9531 |     - |  51.64 KB |
+| MiniEcsStressTest | 140.3 us |  2.52 us |  2.36 us | 15.8691 |      - |     - |  74.14 KB |
 
 ## References
 1. Building an ECS #2: Archetypes and Vectorization (https://medium.com/@ajmmertens/building-an-ecs-2-archetypes-and-vectorization-fe21690805f9)
