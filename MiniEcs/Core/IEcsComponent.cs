@@ -5,5 +5,6 @@ namespace MiniEcs.Core
     /// </summary>
     public interface IEcsComponent
     {
+        
     }
 }

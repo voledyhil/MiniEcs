@@ -19,41 +19,34 @@ namespace MiniEcs.Core
         /// <summary>
         /// At least one of the component types in this array must exist in the archetype
         /// </summary>
-        /// <typeparam name="T0">Component type</typeparam>
         /// <returns>Current filter</returns>
-        public EcsFilter AnyOf<T0>() where T0 : IEcsComponent
+        public EcsFilter AnyOf<TC0>() where TC0 : IEcsComponent
         {
-            return AnyOf(EcsComponentType<T0>.Index);
+            return AnyOf(EcsComponentType<TC0>.Index);
         }
 
         /// <summary>
         /// At least one of the component types in this array must exist in the archetype
         /// </summary>
-        /// <typeparam name="T0">Component type</typeparam>
-        /// <typeparam name="T1">Component type</typeparam>
         /// <returns></returns>
-        public EcsFilter AnyOf<T0, T1>() where T0 : IEcsComponent where T1 : IEcsComponent
+        public EcsFilter AnyOf<TC0, TC1>() where TC0 : IEcsComponent where TC1 : IEcsComponent
         {
-            return AnyOf(EcsComponentType<T0>.Index, EcsComponentType<T1>.Index);
+            return AnyOf(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index);
         }
 
         /// <summary>
         /// At least one of the component types in this array must exist in the archetype
         /// </summary>
-        /// <typeparam name="T0">Component type</typeparam>
-        /// <typeparam name="T1">Component type</typeparam>
-        /// <typeparam name="T2">Component type</typeparam>
         /// <returns>Current filter</returns>
-        public EcsFilter AnyOf<T0, T1, T2>() where T0 : IEcsComponent where T1 : IEcsComponent where T2 : IEcsComponent
+        public EcsFilter AnyOf<TC0, TC1, TC2>() where TC0 : IEcsComponent where TC1 : IEcsComponent where TC2 : IEcsComponent
         {
-            return AnyOf(EcsComponentType<T0>.Index, EcsComponentType<T1>.Index, EcsComponentType<T2>.Index);
+            return AnyOf(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index, EcsComponentType<TC2>.Index);
         }
 
 
         /// <summary>
         /// At least one of the component types in this array must exist in the archetype
         /// </summary>
-        /// <param name="types">Combinations of component types</param>
         /// <returns>Current filter</returns>
         private EcsFilter AnyOf(params byte[] types)
         {
@@ -70,58 +63,47 @@ namespace MiniEcs.Core
         /// <summary>
         /// All component types in this array must exist in the archetype
         /// </summary>
-        /// <typeparam name="T0">Component type</typeparam>
         /// <returns>Current filter</returns>
-        public EcsFilter AllOf<T0>() where T0 : IEcsComponent
+        public EcsFilter AllOf<TC0>() where TC0 : IEcsComponent
         {
-            return AllOf(EcsComponentType<T0>.Index);
+            return AllOf(EcsComponentType<TC0>.Index);
         }
 
         /// <summary>
         /// All component types in this array must exist in the archetype
         /// </summary>
-        /// <typeparam name="T0">Component type</typeparam>
-        /// <typeparam name="T1">Component type</typeparam>
         /// <returns>Current filter</returns>
-        public EcsFilter AllOf<T0, T1>() where T0 : IEcsComponent where T1 : IEcsComponent
+        public EcsFilter AllOf<TC0, TC1>() where TC0 : IEcsComponent where TC1 : IEcsComponent
         {
-            return AllOf(EcsComponentType<T0>.Index, EcsComponentType<T1>.Index);
+            return AllOf(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index);
         }
 
         /// <summary>
         /// All component types in this array must exist in the archetype
         /// </summary>
-        /// <typeparam name="T0">Component type</typeparam>
-        /// <typeparam name="T1">Component type</typeparam>
-        /// <typeparam name="T2">Component type</typeparam>
         /// <returns>Current filter</returns>
-        public EcsFilter AllOf<T0, T1, T2>() where T0 : IEcsComponent where T1 : IEcsComponent where T2 : IEcsComponent
+        public EcsFilter AllOf<TC0, TC1, TC2>() where TC0 : IEcsComponent where TC1 : IEcsComponent where TC2 : IEcsComponent
         {
-            return AllOf(EcsComponentType<T0>.Index, EcsComponentType<T1>.Index, EcsComponentType<T2>.Index);
+            return AllOf(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index, EcsComponentType<TC2>.Index);
         }
 
         /// <summary>
         /// All component types in this array must exist in the archetype
         /// </summary>
-        /// <typeparam name="T0">Component type</typeparam>
-        /// <typeparam name="T1">Component type</typeparam>
-        /// <typeparam name="T2">Component type</typeparam>
-        /// <typeparam name="T3">Component type</typeparam>
         /// <returns>Current filter</returns>
-        public EcsFilter AllOf<T0, T1, T2, T3>() where T0 : IEcsComponent
-            where T1 : IEcsComponent
-            where T2 : IEcsComponent
-            where T3 : IEcsComponent
+        public EcsFilter AllOf<TC0, TC1, TC2, TC3>() where TC0 : IEcsComponent
+            where TC1 : IEcsComponent
+            where TC2 : IEcsComponent
+            where TC3 : IEcsComponent
         {
-            return AllOf(EcsComponentType<T0>.Index, EcsComponentType<T1>.Index, EcsComponentType<T2>.Index,
-                EcsComponentType<T3>.Index);
+            return AllOf(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index, EcsComponentType<TC2>.Index,
+                EcsComponentType<TC3>.Index);
         }
 
 
         /// <summary>
         /// All component types in this array must exist in the archetype
         /// </summary>
-        /// <param name="types">Combinations of component types</param>
         /// <returns>Current filter</returns>
         private EcsFilter AllOf(params byte[] types)
         {
@@ -138,40 +120,33 @@ namespace MiniEcs.Core
         /// <summary>
         /// None of the component types in this array can exist in the archetype
         /// </summary>
-        /// <typeparam name="T0">Component type</typeparam>
         /// <returns>Current filter</returns>
-        public EcsFilter NoneOf<T0>() where T0 : IEcsComponent
+        public EcsFilter NoneOf<TC0>() where TC0 : IEcsComponent
         {
-            return NoneOf(EcsComponentType<T0>.Index);
+            return NoneOf(EcsComponentType<TC0>.Index);
         }
 
         /// <summary>
         /// None of the component types in this array can exist in the archetype 
         /// </summary>
-        /// <typeparam name="T0">Component type</typeparam>
-        /// <typeparam name="T1">Component type</typeparam>
         /// <returns>Current filter</returns>
-        public EcsFilter NoneOf<T0, T1>() where T0 : IEcsComponent where T1 : IEcsComponent
+        public EcsFilter NoneOf<TC0, TC1>() where TC0 : IEcsComponent where TC1 : IEcsComponent
         {
-            return NoneOf(EcsComponentType<T0>.Index, EcsComponentType<T1>.Index);
+            return NoneOf(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index);
         }
 
         /// <summary>
         /// None of the component types in this array can exist in the archetype
         /// </summary>
-        /// <typeparam name="T0">Component type</typeparam>
-        /// <typeparam name="T1">Component type</typeparam>
-        /// <typeparam name="T2">Component type</typeparam>
         /// <returns>Current filter</returns>
-        public EcsFilter NoneOf<T0, T1, T2>() where T0 : IEcsComponent where T1 : IEcsComponent where T2 : IEcsComponent
+        public EcsFilter NoneOf<TC0, TC1, TC2>() where TC0 : IEcsComponent where TC1 : IEcsComponent where TC2 : IEcsComponent
         {
-            return NoneOf(EcsComponentType<T0>.Index, EcsComponentType<T1>.Index, EcsComponentType<T2>.Index);
+            return NoneOf(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index, EcsComponentType<TC2>.Index);
         }
 
         /// <summary>
         /// None of the component types in this array can exist in the archetype
         /// </summary>
-        /// <param name="types">Combinations of component types</param>
         /// <returns>Current filter</returns>
         private EcsFilter NoneOf(params byte[] types)
         {
@@ -222,10 +197,6 @@ namespace MiniEcs.Core
         private int _hash;
         private bool _isCached;
 
-        /// <summary>
-        /// Сalculate a filter hash based on a set of components, for faster filter comparison
-        /// </summary>
-        /// <returns>Hash</returns>
         public override int GetHashCode()
         {
             if (_isCached)

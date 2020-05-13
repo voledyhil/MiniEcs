@@ -41,9 +41,6 @@ namespace MiniEcs.Core
         /// </summary>
         private readonly List<EcsArchetype>[] _archetypeIndices;
 
-        /// <summary>
-        /// Creates an archetype manager
-        /// </summary>
         public EcsArchetypeManager()
         {
             _emptyArchetype = new EcsArchetype(_archetypeIdCounter++, new byte[] { });

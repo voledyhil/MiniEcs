@@ -28,11 +28,6 @@ namespace MiniEcs.Core
         private uint _entityCounter;
 
         /// <summary>
-        /// Archetype Manager
-        /// </summary>
-        private readonly EcsArchetypeManager _archetypeManager;
-
-        /// <summary>
         /// Stores a group of archetypes for the specified filter.
         /// </summary>
         private readonly Dictionary<EcsFilter, EcsGroup> _groups = new Dictionary<EcsFilter, EcsGroup>();
@@ -42,18 +37,13 @@ namespace MiniEcs.Core
         /// </summary>
         private readonly Queue<EcsEntityExtended> _entitiesPool = new Queue<EcsEntityExtended>();
 
-        /// <summary>
-        /// Create new EcsWorld
-        /// </summary>
+        private readonly EcsArchetypeManager _archetypeManager;
+
         public EcsWorld()
         {
             _archetypeManager = new EcsArchetypeManager();
         }
 
-        /// <summary>
-        /// Creates a new entity
-        /// </summary>
-        /// <returns>New Entity</returns>
         public IEcsEntity CreateEntity()
         {
             EcsEntityExtended entity = _entitiesPool.Count <= 0
@@ -63,13 +53,7 @@ namespace MiniEcs.Core
             return entity;
         }
 
-        /// <summary>
-        /// Creates a new entity, with an initial set of components
-        /// </summary>
-        /// <param name="component0">Component</param>
-        /// <typeparam name="T0">Component Type</typeparam>
-        /// <returns>New Entity</returns>
-        public IEcsEntity CreateEntity<T0>(T0 component0) where T0 : IEcsComponent
+        public IEcsEntity CreateEntity<TC0>(TC0 component0) where TC0 : IEcsComponent
         {
             EcsEntityExtended entity = _entitiesPool.Count <= 0
                 ? new EcsEntityExtended(_entitiesPool, _archetypeManager)
@@ -78,16 +62,8 @@ namespace MiniEcs.Core
             return entity;
         }
 
-        /// <summary>
-        /// Creates a new entity, with an initial set of components
-        /// </summary>
-        /// <param name="component0">Component</param>
-        /// <param name="component1">Component</param>
-        /// <typeparam name="T0">Component Type</typeparam>
-        /// <typeparam name="T1">Component Type</typeparam>
-        /// <returns>New Entity</returns>
-        public IEcsEntity CreateEntity<T0, T1>(T0 component0, T1 component1)
-            where T0 : IEcsComponent where T1 : IEcsComponent
+        public IEcsEntity CreateEntity<TC0, TC1>(TC0 component0, TC1 component1)
+            where TC0 : IEcsComponent where TC1 : IEcsComponent
         {
             EcsEntityExtended entity = _entitiesPool.Count <= 0
                 ? new EcsEntityExtended(_entitiesPool, _archetypeManager)
@@ -96,19 +72,8 @@ namespace MiniEcs.Core
             return entity;
         }
 
-        /// <summary>
-        /// Creates a new entity, with an initial set of components
-        /// </summary>
-        /// <param name="component0">Component</param>
-        /// <param name="component1">Component</param>
-        /// <param name="component2">Component</param>
-        /// <typeparam name="T0">Component Type</typeparam>
-        /// <typeparam name="T1">Component Type</typeparam>
-        /// <typeparam name="T2">Component Type</typeparam>
-        /// <returns>New Entity</returns>
-        public IEcsEntity CreateEntity<T0, T1, T2>(T0 component0, T1 component1, T2 component2) where T0 : IEcsComponent
-            where T1 : IEcsComponent
-            where T2 : IEcsComponent
+        public IEcsEntity CreateEntity<TC0, TC1, TC2>(TC0 component0, TC1 component1, TC2 component2) where TC0 : IEcsComponent
+            where TC1 : IEcsComponent where TC2 : IEcsComponent
         {
             EcsEntityExtended entity = _entitiesPool.Count <= 0
                 ? new EcsEntityExtended(_entitiesPool, _archetypeManager)
@@ -117,20 +82,8 @@ namespace MiniEcs.Core
             return entity;
         }
 
-        /// <summary>
-        /// Creates a new entity, with an initial set of components
-        /// </summary>
-        /// <param name="component0">Component</param>
-        /// <param name="component1">Component</param>
-        /// <param name="component2">Component</param>
-        /// <param name="component3">Component</param>
-        /// <typeparam name="T0">Component Type</typeparam>
-        /// <typeparam name="T1">Component Type</typeparam>
-        /// <typeparam name="T2">Component Type</typeparam>
-        /// <typeparam name="T3">Component Type</typeparam>
-        /// <returns>New Entity</returns>
-        public IEcsEntity CreateEntity<T0, T1, T2, T3>(T0 component0, T1 component1, T2 component2, T3 component3)
-            where T0 : IEcsComponent where T1 : IEcsComponent where T2 : IEcsComponent where T3 : IEcsComponent
+        public IEcsEntity CreateEntity<TC0, TC1, TC2, TC3>(TC0 component0, TC1 component1, TC2 component2, TC3 component3)
+            where TC0 : IEcsComponent where TC1 : IEcsComponent where TC2 : IEcsComponent where TC3 : IEcsComponent
         {
             EcsEntityExtended entity = _entitiesPool.Count <= 0
                 ? new EcsEntityExtended(_entitiesPool, _archetypeManager)
@@ -139,11 +92,6 @@ namespace MiniEcs.Core
             return entity;
         }
 
-        /// <summary>
-        /// Get (or create if necessary) a singleton component
-        /// </summary>
-        /// <typeparam name="T">Component Type</typeparam>
-        /// <returns>singleton component</returns>
         public T GetOrCreateSingleton<T>() where T : class, IEcsComponent, new()
         {
             EcsArchetype archetype = _archetypeManager.FindOrCreateArchetype(EcsComponentType<T>.Index);

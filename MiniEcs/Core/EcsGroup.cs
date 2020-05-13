@@ -3,42 +3,44 @@ using System.Runtime.CompilerServices;
 
 namespace MiniEcs.Core
 {
-    public delegate void ForEachArchetypeHandler(EcsArchetype archetype);
     public delegate void ForEachEHandler(IEcsEntity entity);
 
-    public delegate void ForEachECHandler<in C0>(IEcsEntity entity, C0 comp0) where C0 : IEcsComponent;
-    public delegate void ForEachECCHandler<in C0, in C1>(IEcsEntity entity, C0 comp0, C1 comp1) where C0 : IEcsComponent where C1 : IEcsComponent;
-    public delegate void ForEachECCCHandler<in C0, in C1, in C2>(IEcsEntity entity, C0 comp0, C1 comp1, C2 comp2) where C0 : IEcsComponent where C1 : IEcsComponent where C2 : IEcsComponent;
-    public delegate void ForEachECCCCHandler<in C0, in C1, in C2, in C3>(IEcsEntity entity, C0 comp0, C1 comp1, C2 comp2, C3 comp3) where C0 : IEcsComponent where C1 : IEcsComponent where C2 : IEcsComponent where C3 : IEcsComponent;
+    public delegate void ForEachArchetypeHandler(IEcsArchetype archetype);
+
+    public delegate void ForEachEcHandler<in TC0>(IEcsEntity entity, TC0 comp0) where TC0 : IEcsComponent;
+
+    public delegate void ForEachEccHandler<in TC0, in TC1>(IEcsEntity entity, TC0 comp0, TC1 comp1)
+        where TC0 : IEcsComponent where TC1 : IEcsComponent;
+
+    public delegate void ForEachEcccHandler<in TC0, in TC1, in TC2>(IEcsEntity entity, TC0 comp0, TC1 comp1, TC2 comp2)
+        where TC0 : IEcsComponent where TC1 : IEcsComponent where TC2 : IEcsComponent;
+
+    public delegate void ForEachEccccHandler<in TC0, in TC1, in TC2, in TC3>(IEcsEntity entity, TC0 comp0, TC1 comp1,
+        TC2 comp2, TC3 comp3) where TC0 : IEcsComponent
+        where TC1 : IEcsComponent
+        where TC2 : IEcsComponent
+        where TC3 : IEcsComponent;
 
     /// <summary>
     /// collection of archetypes matching filter criteria
     /// </summary>
     public interface IEcsGroup
     {
-        /// <summary>
-        /// Calculate the number of entities in a group
-        /// </summary>
-        /// <returns>Number of entities</returns>
         int CalculateCount();
 
         void ForEach(ForEachArchetypeHandler handler);
         void ForEach(ForEachEHandler handler);
-        void ForEach<C0>(ForEachECHandler<C0> handler) 
-            where C0 : IEcsComponent;
-        
-        void ForEach<C0, C1>(ForEachECCHandler<C0, C1> handler) 
-            where C0 : IEcsComponent 
-            where C1 : IEcsComponent;
+        void ForEach<TC0>(ForEachEcHandler<TC0> handler) where TC0 : IEcsComponent;
+        void ForEach<TC0, TC1>(ForEachEccHandler<TC0, TC1> handler) where TC0 : IEcsComponent where TC1 : IEcsComponent;
 
-        void ForEach<C0, C1, C2>(ForEachECCCHandler<C0, C1, C2> handler) where C0 : IEcsComponent
-            where C1 : IEcsComponent
-            where C2 : IEcsComponent;
+        void ForEach<TC0, TC1, TC2>(ForEachEcccHandler<TC0, TC1, TC2> handler) where TC0 : IEcsComponent
+            where TC1 : IEcsComponent
+            where TC2 : IEcsComponent;
 
-        void ForEach<C0, C1, C2, C3>(ForEachECCCCHandler<C0, C1, C2, C3> handler) where C0 : IEcsComponent
-            where C1 : IEcsComponent
-            where C2 : IEcsComponent
-            where C3 : IEcsComponent;
+        void ForEach<TC0, TC1, TC2, TC3>(ForEachEccccHandler<TC0, TC1, TC2, TC3> handler) where TC0 : IEcsComponent
+            where TC1 : IEcsComponent
+            where TC2 : IEcsComponent
+            where TC3 : IEcsComponent;
 
         IEcsEntity[] ToEntityArray();
     }
@@ -49,6 +51,8 @@ namespace MiniEcs.Core
     /// </summary>
     public class EcsGroup : IEcsGroup
     {
+        private delegate void ForEachArchetypeHandler(EcsArchetype archetype);
+
         /// <summary>
         /// Сurrent group version
         /// </summary>
@@ -94,15 +98,15 @@ namespace MiniEcs.Core
             {
                 count += archetype.EntitiesCount;
             }
+
             return count;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ForEach(ForEachArchetypeHandler handler)
+        private void ForEach(ForEachArchetypeHandler handler)
         {
-            for (int i = 0; i < _archetypes.Count; i++)
+            foreach (EcsArchetype archetype in _archetypes)
             {
-                EcsArchetype archetype = _archetypes[i];
                 if (archetype.EntitiesCount <= 0)
                     continue;
 
@@ -110,6 +114,34 @@ namespace MiniEcs.Core
             }
         }
 
+        public IEcsEntity[] ToEntityArray()
+        {
+            int index = 0;
+            IEcsEntity[] totalEntities = new IEcsEntity[CalculateCount()];
+
+            ForEach(archetype =>
+            {
+                EcsEntity[] entities = archetype.GetEntities(out int length);
+                for (int j = 0; j < length; j++)
+                {
+                    totalEntities[index++] = entities[j];
+                }
+            });
+
+            return totalEntities;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ForEach(Core.ForEachArchetypeHandler handler)
+        {
+            foreach (EcsArchetype archetype in _archetypes)
+            {
+                if (archetype.EntitiesCount <= 0)
+                    continue;
+
+                handler(archetype);
+            }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ForEach(ForEachEHandler handler)
@@ -120,89 +152,72 @@ namespace MiniEcs.Core
                 for (int j = 0; j < length; j++)
                 {
                     handler(entities[j]);
-                }  
+                }
             });
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ForEach<C0>(ForEachECHandler<C0> handler) where C0 : IEcsComponent
+        void IEcsGroup.ForEach<TC0>(ForEachEcHandler<TC0> handler)
         {
             ForEach(archetype =>
             {
-                EcsComponentPool<C0> comps0 = archetype.GetComponentPool<C0>();
+                EcsComponentPool<TC0> comps0 = archetype.GetComponentPool<TC0>();
 
                 EcsEntity[] entities = archetype.GetEntities(out int length);
                 for (int j = 0; j < length; j++)
                 {
                     handler(entities[j], comps0.GetTyped(j));
-                }   
+                }
             });
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ForEach<C0, C1>(ForEachECCHandler<C0, C1> handler) where C0 : IEcsComponent where C1 : IEcsComponent
+
+        void IEcsGroup.ForEach<TC0, TC1>(ForEachEccHandler<TC0, TC1> handler)
         {
             ForEach(archetype =>
             {
-                EcsComponentPool<C0> comps0 = archetype.GetComponentPool<C0>();
-                EcsComponentPool<C1> comps1 = archetype.GetComponentPool<C1>();
+                EcsComponentPool<TC0> comps0 = archetype.GetComponentPool<TC0>();
+                EcsComponentPool<TC1> comps1 = archetype.GetComponentPool<TC1>();
 
                 EcsEntity[] entities = archetype.GetEntities(out int length);
                 for (int j = 0; j < length; j++)
                 {
                     handler(entities[j], comps0.GetTyped(j), comps1.GetTyped(j));
-                }    
+                }
             });
         }
 
-        public void ForEach<C0, C1, C2>(ForEachECCCHandler<C0, C1, C2> handler) where C0 : IEcsComponent where C1 : IEcsComponent where C2 : IEcsComponent
+        void IEcsGroup.ForEach<TC0, TC1, TC2>(ForEachEcccHandler<TC0, TC1, TC2> handler)
         {
             ForEach(archetype =>
             {
-                EcsComponentPool<C0> comps0 = archetype.GetComponentPool<C0>();
-                EcsComponentPool<C1> comps1 = archetype.GetComponentPool<C1>();
-                EcsComponentPool<C2> comps2 = archetype.GetComponentPool<C2>();
+                EcsComponentPool<TC0> comps0 = archetype.GetComponentPool<TC0>();
+                EcsComponentPool<TC1> comps1 = archetype.GetComponentPool<TC1>();
+                EcsComponentPool<TC2> comps2 = archetype.GetComponentPool<TC2>();
 
                 EcsEntity[] entities = archetype.GetEntities(out int length);
                 for (int j = 0; j < length; j++)
                 {
                     handler(entities[j], comps0.GetTyped(j), comps1.GetTyped(j), comps2.GetTyped(j));
-                }    
+                }
             });
         }
 
-        public void ForEach<C0, C1, C2, C3>(ForEachECCCCHandler<C0, C1, C2, C3> handler) where C0 : IEcsComponent where C1 : IEcsComponent where C2 : IEcsComponent where C3 : IEcsComponent
+        void IEcsGroup.ForEach<TC0, TC1, TC2, TC3>(ForEachEccccHandler<TC0, TC1, TC2, TC3> handler)
         {
             ForEach(archetype =>
             {
-                EcsComponentPool<C0> comps0 = archetype.GetComponentPool<C0>();
-                EcsComponentPool<C1> comps1 = archetype.GetComponentPool<C1>();
-                EcsComponentPool<C2> comps2 = archetype.GetComponentPool<C2>();
-                EcsComponentPool<C3> comps3 = archetype.GetComponentPool<C3>();
+                EcsComponentPool<TC0> comps0 = archetype.GetComponentPool<TC0>();
+                EcsComponentPool<TC1> comps1 = archetype.GetComponentPool<TC1>();
+                EcsComponentPool<TC2> comps2 = archetype.GetComponentPool<TC2>();
+                EcsComponentPool<TC3> comps3 = archetype.GetComponentPool<TC3>();
 
                 EcsEntity[] entities = archetype.GetEntities(out int length);
                 for (int j = 0; j < length; j++)
                 {
-                    handler(entities[j], comps0.GetTyped(j), comps1.GetTyped(j), comps2.GetTyped(j), comps3.GetTyped(j));
-                }    
+                    handler(entities[j], comps0.GetTyped(j), comps1.GetTyped(j), comps2.GetTyped(j),
+                        comps3.GetTyped(j));
+                }
             });
-        }
-
-        public IEcsEntity[] ToEntityArray()
-        {
-            int index = 0;
-            IEcsEntity[] totalEntities = new IEcsEntity[CalculateCount()];
-            
-            ForEach(archetype =>
-            {
-                EcsEntity[] entities = archetype.GetEntities(out int length);
-                for (int j = 0; j < length; j++)
-                {
-                    totalEntities[index++] = entities[j];
-                }  
-            });
-            
-            return totalEntities;
         }
     }
 }

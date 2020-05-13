@@ -12,25 +12,14 @@ namespace MiniEcs.Core.Systems
     /// </summary>
     public class EcsSystemGroup : IEcsSystem
     {
-        /// <summary>
-        /// Enumerator of child systems and systems group
-        /// </summary>
         public IEnumerable<IEcsSystem> Systems => _systems;
 
         /// <summary>
         /// Indicates that after updating the list, nodes should be sorted.
         /// </summary>
         private bool _dirty;
-
-        /// <summary>
-        /// List of child systems and systems group
-        /// </summary>
+        
         private readonly List<IEcsSystem> _systems = new List<IEcsSystem>();
-
-        /// <summary>
-        /// Adds a system or group of systems to the list
-        /// </summary>
-        /// <param name="system">System or group of systems</param>
         public void AddSystem(IEcsSystem system)
         {
             AddSystem(GetSystemGroupHierarchy(system.GetType()), system);
