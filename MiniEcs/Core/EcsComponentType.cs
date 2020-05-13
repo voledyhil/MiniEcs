@@ -4,7 +4,7 @@ namespace MiniEcs.Core
 {
     internal sealed class EcsComponentTypeCount
     {
-        internal static int ComponentTypesCount;
+        internal static int Count;
     }
 
     public static class EcsComponentType<T> where T : IEcsComponent
@@ -13,7 +13,7 @@ namespace MiniEcs.Core
 
         static EcsComponentType()
         {
-            Index = (byte) Interlocked.Increment(ref EcsComponentTypeCount.ComponentTypesCount);
+            Index = (byte) Interlocked.Increment(ref EcsComponentTypeCount.Count);
         }
     }
 }

@@ -51,29 +51,6 @@ namespace MiniEcs.Tests.Core
         }
 
         [TestMethod]
-        public void ArchetypeCountTest()
-        {            
-            /*
-             *  Archetypes
-             *  ----------
-             *  1.  Empty
-             *  2.  A
-             *  3.  AB
-             *  4.  ABD
-             *  5.  AC
-             *  6.  B
-             *  7.  BD
-             *  8.  D
-             *  9.  C
-             *  10. CB
-             *  11. AD
-             */
-            
-            Assert.AreEqual(11, _world.ArchetypeCount);
-        }
-
-
-        [TestMethod]
         public void GetSetRemoveComponentTest()
         {
             EcsWorld world = new EcsWorld();

@@ -120,7 +120,8 @@ namespace MiniEcs.Core
             for (int i = 0; i < indices.Length; i++)
             {
                 byte index = indices[i];
-                if (!curArchetype.Next.TryGetValue(index, out EcsArchetype nextArchetype))
+                EcsArchetype nextArchetype = curArchetype.Next[index];
+                if (nextArchetype == null)
                 {
                     byte[] archetypeIndices = new byte[i + 1];
                     for (int j = 0; j < archetypeIndices.Length; j++)
@@ -154,7 +155,8 @@ namespace MiniEcs.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EcsArchetype FindOrCreateNextArchetype(EcsArchetype archetype, byte addIndex)
         {
-            if (archetype.Next.TryGetValue(addIndex, out EcsArchetype nextArchetype))
+            EcsArchetype nextArchetype = archetype.Next[addIndex];
+            if (nextArchetype != null)
                 return nextArchetype;
 
             bool added = false;
@@ -187,7 +189,8 @@ namespace MiniEcs.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EcsArchetype FindOrCreatePriorArchetype(EcsArchetype archetype, byte removeIndex)
         {
-            if (archetype.Prior.TryGetValue(removeIndex, out EcsArchetype priorArchetype))
+            EcsArchetype priorArchetype = archetype.Prior[removeIndex];
+            if (priorArchetype != null)
                 return priorArchetype;
 
             int length = 0;

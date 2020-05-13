@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace MiniEcs.Core
 {
@@ -21,20 +20,9 @@ namespace MiniEcs.Core
         public int IndicesCount => Indices.Length;
 
         /// <summary>
-        /// Calculate number entities in archetype
+        /// Number entities in archetype
         /// </summary>
-        public int EntitiesCount
-        {
-            get
-            {
-                if (!_needRemoveHoles)
-                    return _length;
-
-                RemoveHoles();
-                _needRemoveHoles = false;
-                return _length;
-            }
-        }
+        public int EntitiesCount => _count;
         
         /// <summary>
         /// Unique combinations of component types
@@ -44,29 +32,17 @@ namespace MiniEcs.Core
         /// <summary>
         /// Transitions to the next archetype when adding a new type of component
         /// </summary>
-        public readonly Dictionary<byte, EcsArchetype> Next = new Dictionary<byte, EcsArchetype>();
+        public readonly EcsArchetype[] Next = new EcsArchetype[byte.MaxValue];
 
         /// <summary>
         /// Transitions to the previous archetype when deleting an existing component type
         /// </summary>
-        public readonly Dictionary<byte, EcsArchetype> Prior = new Dictionary<byte, EcsArchetype>();
+        public readonly EcsArchetype[] Prior = new EcsArchetype[byte.MaxValue];
 
         
-        
-
-        /// <summary>
-        /// Number entities in archetype
-        /// </summary>
         private int _length;
-
-        /// <summary>
-        /// There are holes in the array, you need to rebuild the entities
-        /// </summary>
-        private bool _needRemoveHoles;
-        
-        /// <summary>
-        /// array of entities corresponding to archetype
-        /// </summary>
+        private int _count;
+        private int _freeIndex = int.MaxValue;
         private EcsEntity[] _entities = new EcsEntity[1];
 
         /// <summary>
@@ -87,12 +63,7 @@ namespace MiniEcs.Core
         /// <returns>Entities array</returns>
         public EcsEntity[] GetEntities(out int length)
         {
-            if (_needRemoveHoles)
-            {
-                RemoveHoles();
-                _needRemoveHoles = false;
-            }
-
+            RemoveHoles();
             length = _length;
             return _entities;
         }
@@ -107,8 +78,8 @@ namespace MiniEcs.Core
                 Array.Resize(ref _entities, 2 * _entities.Length);
 
             entity.ArchetypeIndex = _length;
-
             _entities[_length++] = entity;
+            _count++;
         }
 
         /// <summary>
@@ -118,7 +89,18 @@ namespace MiniEcs.Core
         public void RemoveEntity(EcsEntity entity)
         {
             _entities[entity.ArchetypeIndex] = null;
-            _needRemoveHoles = true;
+            _freeIndex = Math.Min(_freeIndex, entity.ArchetypeIndex);
+            _count--;
+
+            if (_freeIndex == _length - 1)
+            {
+                _length = _freeIndex;
+                _freeIndex = int.MaxValue;
+            }
+            else if (_length >= _count + _count)
+            {
+                RemoveHoles();
+            }
         }
 
         /// <summary>
@@ -126,20 +108,10 @@ namespace MiniEcs.Core
         /// </summary>
         private void RemoveHoles()
         {
-            int freeIndex = int.MaxValue;
-            for (int i = 0; i < _length; i++)
-            {
-                if (_entities[i] != null)
-                    continue;
-
-                freeIndex = i;
-                break;
-            }
-
-            if (freeIndex >= _length)
+            if (_freeIndex >= _length)
                 return;
 
-            int current = freeIndex + 1;
+            int current = _freeIndex + 1;
             while (current < _length)
             {
                 while (current < _length && _entities[current] == null)
@@ -149,11 +121,12 @@ namespace MiniEcs.Core
                     continue;
 
                 EcsEntity entity = _entities[current++];
-                entity.ArchetypeIndex = freeIndex;
-                _entities[freeIndex++] = entity;
+                entity.ArchetypeIndex = _freeIndex;
+                _entities[_freeIndex++] = entity;
             }
 
-            _length = freeIndex;
+            _length = _freeIndex;
+            _freeIndex = int.MaxValue;
         }
     }
 }

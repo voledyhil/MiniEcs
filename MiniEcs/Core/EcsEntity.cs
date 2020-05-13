@@ -62,28 +62,46 @@ namespace MiniEcs.Core
 
         public void Initialize<T0>(uint id, T0 component0) where T0 : IEcsComponent
         {
-            Initialize(id);
-
-            AddComponent(component0);
+            Id = id;
+            
+            byte index0 = EcsComponentType<T0>.Index;
+            
+            _components[index0] = component0;
+            
+            _archetype = _archetypeManager.FindOrCreateArchetype(index0);
+            _archetype.AddEntity(this);
         }
 
         public void Initialize<T0, T1>(uint id, T0 component0, T1 component1)
             where T0 : IEcsComponent where T1 : IEcsComponent
         {
-            Initialize(id);
-
-            AddComponent(component0);
-            AddComponent(component1);
+            Id = id;
+            
+            byte index0 = EcsComponentType<T0>.Index;
+            byte index1 = EcsComponentType<T1>.Index;
+            
+            _components[index0] = component0;
+            _components[index1] = component1;
+            
+            _archetype = _archetypeManager.FindOrCreateArchetype(index0, index1);
+            _archetype.AddEntity(this);
         }
 
         public void Initialize<T0, T1, T2>(uint id, T0 component0, T1 component1, T2 component2)
             where T0 : IEcsComponent where T1 : IEcsComponent where T2 : IEcsComponent
         {
-            Initialize(id);
-
-            AddComponent(component0);
-            AddComponent(component1);
-            AddComponent(component2);
+            Id = id;
+            
+            byte index0 = EcsComponentType<T0>.Index;
+            byte index1 = EcsComponentType<T1>.Index;
+            byte index2 = EcsComponentType<T2>.Index;
+            
+            _components[index0] = component0;
+            _components[index1] = component1;
+            _components[index2] = component2;
+            
+            _archetype = _archetypeManager.FindOrCreateArchetype(index0, index1, index2);
+            _archetype.AddEntity(this);
         }
 
         public void Initialize<T0, T1, T2, T3>(uint id, T0 component0, T1 component1, T2 component2,
@@ -92,12 +110,20 @@ namespace MiniEcs.Core
             where T2 : IEcsComponent
             where T3 : IEcsComponent
         {
-            Initialize(id);
-
-            AddComponent(component0);
-            AddComponent(component1);
-            AddComponent(component2);
-            AddComponent(component3);
+            Id = id;
+            
+            byte index0 = EcsComponentType<T0>.Index;
+            byte index1 = EcsComponentType<T1>.Index;
+            byte index2 = EcsComponentType<T2>.Index;
+            byte index3 = EcsComponentType<T3>.Index;
+            
+            _components[index0] = component0;
+            _components[index1] = component1;
+            _components[index2] = component2;
+            _components[index3] = component3;
+            
+            _archetype = _archetypeManager.FindOrCreateArchetype(index0, index1, index2, index3);
+            _archetype.AddEntity(this);
         }
 
         /// <summary>
