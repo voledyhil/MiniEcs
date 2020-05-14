@@ -11,13 +11,23 @@ The EcsWorld class acts as a manager for creating an entity, selecting a collect
 ### Declare Components
 ```csharp
 
-public class ComponentA : IEcsComponent { }
+public class ComponentA : IEcsComponent 
+{ 
+}
 
-public class ComponentB : IEcsComponent { }
+public class ComponentB : IEcsComponent 
+{ 
+    public int Value;
+}
 
-public class ComponentC : IEcsComponent { }
+public class ComponentC : IEcsComponent 
+{ 
+}
 
-public class ComponentD : IEcsComponent { }
+public class ComponentD : IEcsComponent 
+{
+    public int Value;
+}
 ```    
 Create world
 
@@ -73,11 +83,11 @@ var group = world.Filter(filterBDnA);
 ```
 Enumerate Entities
 ```csharp
-foreach (var entity in group))
+group.ForEach((IEcsEntity entity, ComponentB compB, ComponentD compD) =>
 {
-    var compB = entity.GetComponent<ComponentB>();
-    var compD = entity.GetComponent<ComponentD>();
-}
+    compB.Value++;
+    compD.Value++;
+});
 ```
 ### Systems
 The system provides logic that converts component data from its current state to its next state - for example, the system can update the positions of all moving objects at their speed times the time interval since the last update.
@@ -93,11 +103,11 @@ public class SystemBD : IEcsSystem
     }
     public void Update(float deltaTime, EcsWorld world)
     {
-        foreach (var entity in world.Filter(_filterBDnA)))
+        world.Filter(_filterBDnA).ForEach((IEcsEntity entity, ComponentB compB, ComponentD compD) =>
         {
-            var compB = entity.GetComponent<ComponentB>();
-            var compD = entity.GetComponent<ComponentD>();
-        }
+            compB.Value++;
+            compD.Value++;
+        });
     }
 }
 ```
@@ -164,10 +174,12 @@ Intel Core i7-8850H CPU 2.60GHz (Coffee Lake), 1 CPU, 12 logical and 6 physical 
   [Host]     : .NET Core 2.2.5 (CoreCLR 4.6.27617.05, CoreFX 4.6.27618.01), X64 RyuJIT
   DefaultJob : .NET Core 2.2.5 (CoreCLR 4.6.27617.05, CoreFX 4.6.27618.01), X64 RyuJIT
 ```
-|            Method |     Mean |    Error |   StdDev |   Gen 0 |  Gen 1 | Gen 2 | Allocated |
-|------------------ |---------:|---------:|---------:|--------:|-------:|------:|----------:|
-| EntitasStressTest | 540.7 us | 15.24 us | 42.24 us |  7.8125 | 1.9531 |     - |  51.64 KB |
-| MiniEcsStressTest | 140.3 us |  2.52 us |  2.36 us | 15.8691 |      - |     - |  74.14 KB |
+|            Method |        Mean |      Error |     StdDev |    Gen 0 |   Gen 1 | Gen 2 | Allocated |
+|------------------ |------------:|-----------:|-----------:|---------:|--------:|------:|----------:|
+| EntitasStressTest | 8,846.89 us | 170.380 us | 151.037 us |  78.1250 | 31.2500 |     - |  491640 B |
+| MiniEcsStressTest | 1,202.59 us |  16.617 us |  15.543 us | 138.6719 | 44.9219 |     - |  716312 B |
+|    EntitasForEach |   711.27 us |  16.047 us |  47.063 us |        - |       - |     - |     272 B |
+|    MiniEcsForEach |    42.32 us |   0.171 us |   0.143 us |   0.1831 |       - |     - |     944 B |
 
 ## References
 1. Building an ECS #2: Archetypes and Vectorization (https://medium.com/@ajmmertens/building-an-ecs-2-archetypes-and-vectorization-fe21690805f9)
