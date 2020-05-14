@@ -8,6 +8,7 @@ namespace MiniEcs.Core
         int Id { get; }
         int IndicesCount { get; }
         int EntitiesCount { get; }
+        IEcsEntity this[int index] { get; }
     }
 
     /// <summary>
@@ -28,7 +29,7 @@ namespace MiniEcs.Core
                 return _length;
             }
         }
-
+        
         /// <summary>
         /// Unique combinations of component types
         /// </summary>
@@ -66,6 +67,18 @@ namespace MiniEcs.Core
             {
                 IEcsComponentPoolCreator creator = EcsTypeManager.ComponentPoolCreators[index];
                 _compPools[index] = creator.InstantiatePool();
+            }
+        }
+        
+        public IEcsEntity this[int index]
+        {
+            get
+            {
+                if (index < 0 || index >= _length)
+                    throw new IndexOutOfRangeException();
+                
+                RemoveHoles();
+                return _entities[index];
             }
         }
 

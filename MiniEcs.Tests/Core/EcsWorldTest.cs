@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MiniEcs.Core;
 
@@ -47,7 +46,6 @@ namespace MiniEcs.Tests.Core
             _entityBC = _world.CreateEntity(new ComponentC(), new ComponentB());
             _entityAB = _world.CreateEntity(new ComponentB(), new ComponentA());
             _entityAD = _world.CreateEntity(new ComponentA(), new ComponentD());
-
         }
 
         [TestMethod]
@@ -86,6 +84,7 @@ namespace MiniEcs.Tests.Core
             });
 
             
+            
             entities = new List<IEcsEntity>
             {
                 _entityABD, _entityBD0, _entityBD1
@@ -116,6 +115,7 @@ namespace MiniEcs.Tests.Core
             });
             
              
+            
             entities = new List<IEcsEntity>
             {
                 _entityABD, _entityBD0, _entityBD1, _entityBC, _entityAB, _entityAD
@@ -145,6 +145,7 @@ namespace MiniEcs.Tests.Core
             });
             
             
+            
             group = _world.Filter(new EcsFilter().NoneOf<ComponentB, ComponentD, ComponentB>());
             Assert.AreEqual(entities.Count, group.CalculateCount());
             group.ForEach(entity =>
@@ -168,6 +169,7 @@ namespace MiniEcs.Tests.Core
             {
                 Assert.IsTrue(entities.Contains(entity));
             });
+            
             
             
             entities = new List<IEcsEntity>
@@ -219,11 +221,9 @@ namespace MiniEcs.Tests.Core
         {
             EcsWorld world = new EcsWorld();            
             IEcsEntity entity = world.CreateEntity(new ComponentA(), new ComponentB());
-
             Assert.AreEqual(1, world.Filter(new EcsFilter().AllOf<ComponentB>()).CalculateCount());
-            
-            entity.AddComponent(new ComponentC());
-            
+          
+            entity.AddComponent(new ComponentC());  
             world.CreateEntity(new ComponentC(), new ComponentD());
             
             Assert.AreEqual(1, world.Filter(new EcsFilter().AllOf<ComponentB>()).CalculateCount());
@@ -247,7 +247,7 @@ namespace MiniEcs.Tests.Core
             EcsWorld world = new EcsWorld();
             Assert.AreEqual(0, world.EntitiesInProcessing);
 
-            IEcsEntity entity = world.CreateEntity(new ComponentA());
+            IEcsEntity entity = world.CreateEntity(new ComponentA(), new ComponentB(), new ComponentC(), new ComponentD());
             uint entityId = entity.Id;
             entity.Destroy();
             
@@ -279,6 +279,37 @@ namespace MiniEcs.Tests.Core
             EcsWorld world = new EcsWorld();
             IEcsEntity entity = world.CreateEntity();
             entity.RemoveComponent<ComponentA>();
+        }
+
+
+        [TestMethod]
+        public void ArchetypeRemoveHolesTest()
+        {
+            EcsWorld world = new EcsWorld();
+            IEcsArchetype archetype = world.GetArchetype<ComponentA, ComponentB>();
+            
+            IEcsEntity entity0 = world.CreateEntity(new ComponentA(), new ComponentB());
+            IEcsEntity entity1 = world.CreateEntity(new ComponentA(), new ComponentB());
+            IEcsEntity entity2 = world.CreateEntity(new ComponentA(), new ComponentB());
+            IEcsEntity entity3 = world.CreateEntity(new ComponentA(), new ComponentB());
+            
+            entity1.RemoveComponent<ComponentA>();
+            entity2.RemoveComponent<ComponentA>();
+            Assert.AreEqual(2, archetype.EntitiesCount);
+            Assert.AreEqual(entity0, archetype[0]);
+            Assert.AreEqual(entity3, archetype[1]);
+            
+            entity0.RemoveComponent<ComponentA>();
+            Assert.AreEqual(1, archetype.EntitiesCount);
+            Assert.AreEqual(entity3, archetype[0]);
+
+            
+            entity1.AddComponent(new ComponentA()); 
+            entity2.AddComponent(new ComponentA());
+            Assert.AreEqual(3, archetype.EntitiesCount);
+            Assert.AreEqual(entity3, archetype[0]);
+            Assert.AreEqual(entity1, archetype[1]);
+            Assert.AreEqual(entity2, archetype[2]);
         }
     }
 }

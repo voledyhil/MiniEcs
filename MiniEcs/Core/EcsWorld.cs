@@ -92,17 +92,32 @@ namespace MiniEcs.Core
             return entity;
         }
 
-        public T GetOrCreateSingleton<T>() where T : class, IEcsComponent, new()
+        public TC GetOrCreateSingleton<TC>() where TC : class, IEcsComponent, new()
         {
-            EcsArchetype archetype = _archetypeManager.FindOrCreateArchetype(EcsComponentType<T>.Index);
+            EcsArchetype archetype = _archetypeManager.FindOrCreateArchetype(EcsComponentType<TC>.Index);
             EcsEntity[] entities = archetype.GetEntities(out int length);
 
             for (int i = 0; i < length;)
-                return entities[i].GetComponent<T>();
+                return entities[i].GetComponent<TC>();
 
-            T component = new T();
+            TC component = new TC();
             CreateEntity(component);
             return component;
+        }
+
+        public IEcsArchetype GetArchetype<TC>() where TC : IEcsComponent
+        {
+            return _archetypeManager.FindOrCreateArchetype(EcsComponentType<TC>.Index);
+        }
+        
+        public IEcsArchetype GetArchetype<TC0, TC1>() where TC0 : IEcsComponent where TC1 : IEcsComponent
+        {
+            return _archetypeManager.FindOrCreateArchetype(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index);
+        }
+        
+        public IEcsArchetype GetArchetype<TC0, TC1, TC2>() where TC0 : IEcsComponent where TC1 : IEcsComponent where TC2 : IEcsComponent
+        {
+            return _archetypeManager.FindOrCreateArchetype(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index, EcsComponentType<TC2>.Index);
         }
 
         /// <summary>
