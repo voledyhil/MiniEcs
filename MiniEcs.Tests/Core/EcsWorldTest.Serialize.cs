@@ -10,18 +10,10 @@ namespace MiniEcs.Tests.Core
         [TestMethod]
         public void SerializeUpdateTest()
         {
-            byte[] data;
-            using (BinaryDataWriter writer = new BinaryDataWriter())
-            {
-                _world.Serialize(new EcsFilter(), writer);
-                data = writer.GetData();
-            }
+            byte[] data = _world.Serialize(new EcsFilter());
 
             EcsWorld target = new EcsWorld();
-            using (BinaryDataReader reader = new BinaryDataReader(data))
-            {
-                target.Update(reader);
-            }
+            target.Update(data);
 
             IEcsEntity entityAB = target[_entityAB.Id];
             Assert.AreEqual(_entityAB.GetComponent<ComponentA>(), entityAB.GetComponent<ComponentA>());
@@ -57,19 +49,11 @@ namespace MiniEcs.Tests.Core
         public void SerializeUpdateBaselineTest()
         {
             Baseline<uint> baseline = new Baseline<uint>();
-
-            byte[] data;
-            using (BinaryDataWriter writer = new BinaryDataWriter())
-            {
-                _world.Serialize(new EcsFilter(), writer, baseline);
-                data = writer.GetData();
-            }
+            byte[] data = _world.Serialize(new EcsFilter(), baseline);
 
             EcsWorld source = new EcsWorld();
-            using (BinaryDataReader reader = new BinaryDataReader(data))
-            {
-                source.Update(reader);
-            }
+            source.Update(data);
+            
 
             IEcsEntity entityAB = source[_entityAB.Id];
             Assert.AreEqual(_entityAB.GetComponent<ComponentA>(), entityAB.GetComponent<ComponentA>());
@@ -101,28 +85,16 @@ namespace MiniEcs.Tests.Core
             Assert.AreEqual(_entityBD1.GetComponent<ComponentD>(), entityBD1.GetComponent<ComponentD>());
 
 
-            using (BinaryDataWriter writer = new BinaryDataWriter())
-            {
-                source.Serialize(new EcsFilter(), writer, baseline);
-                data = writer.GetData();
-            }
-
+            data = source.Serialize(new EcsFilter(), baseline);
             Assert.AreEqual(0, data.Length);
 
 
             EcsWorld target = new EcsWorld();
             // change Component
             entityAB.GetComponent<ComponentA>().Value = int.MaxValue;
-            using (BinaryDataWriter writer = new BinaryDataWriter())
-            {
-                source.Serialize(new EcsFilter(), writer, baseline);
-                data = writer.GetData();
-            }
-
-            using (BinaryDataReader reader = new BinaryDataReader(data))
-            {
-                target.Update(reader);
-            }
+            data = source.Serialize(new EcsFilter(), baseline);
+            
+            target.Update(data);
 
             Assert.AreEqual(1, target.EntitiesCount);
             Assert.AreEqual(entityAB.GetComponent<ComponentA>(), target[entityAB.Id].GetComponent<ComponentA>());
@@ -130,64 +102,36 @@ namespace MiniEcs.Tests.Core
 
             //removeComponent
             entityAB.RemoveComponent<ComponentA>();
-            using (BinaryDataWriter writer = new BinaryDataWriter())
-            {
-                source.Serialize(new EcsFilter(), writer, baseline);
-                data = writer.GetData();
-            }
-
-            using (BinaryDataReader reader = new BinaryDataReader(data))
-            {
-                target.Update(reader);
-            }
+            data = source.Serialize(new EcsFilter(), baseline);
+            
+            target.Update(data);
 
             Assert.AreEqual(1, target.EntitiesCount);
             Assert.IsFalse(target[entityAB.Id].HasComponent<ComponentA>());
 
             //AddComponent
             entityAB.AddComponent(new ComponentA());
-            using (BinaryDataWriter writer = new BinaryDataWriter())
-            {
-                source.Serialize(new EcsFilter(), writer, baseline);
-                data = writer.GetData();
-            }
-
-            using (BinaryDataReader reader = new BinaryDataReader(data))
-            {
-                target.Update(reader);
-            }
+            data = source.Serialize(new EcsFilter(), baseline);
+            
+            target.Update(data);
 
             Assert.AreEqual(1, target.EntitiesCount);
             Assert.IsTrue(target[entityAB.Id].HasComponent<ComponentA>());
 
             //remove Entity
             entityAB.Destroy();
-            using (BinaryDataWriter writer = new BinaryDataWriter())
-            {
-                source.Serialize(new EcsFilter(), writer, baseline);
-                data = writer.GetData();
-            }
-
-            using (BinaryDataReader reader = new BinaryDataReader(data))
-            {
-                target.Update(reader);
-            }
+            data = source.Serialize(new EcsFilter(), baseline);
+            
+            target.Update(data);
 
             Assert.AreEqual(0, target.EntitiesCount);
 
 
             //create Entity
             entityAB = source.CreateEntity(new ComponentA {Value = 100}, new ComponentB {Value = 200});
-            using (BinaryDataWriter writer = new BinaryDataWriter())
-            {
-                source.Serialize(new EcsFilter(), writer, baseline);
-                data = writer.GetData();
-            }
-
-            using (BinaryDataReader reader = new BinaryDataReader(data))
-            {
-                target.Update(reader);
-            }
+            data = source.Serialize(new EcsFilter(), baseline);
+            
+            target.Update(data);
 
             Assert.AreEqual(1, target.EntitiesCount);
             IEcsEntity targetEntityAB = target[entityAB.Id];
