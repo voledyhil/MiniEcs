@@ -17,7 +17,7 @@ public class ComponentA : IEcsComponent
 
 public class ComponentB : IEcsComponent 
 { 
-    public int Value;
+    [BinaryItem] public int Value;
 }
 
 public class ComponentC : IEcsComponent 
@@ -28,7 +28,15 @@ public class ComponentD : IEcsComponent
 {
     public int Value;
 }
-```    
+```
+### Register Components
+
+```csharp
+EcsComponentType<ComponentA>.Register();
+EcsComponentType<ComponentB>.Register();
+EcsComponentType<ComponentC>.Register();
+EcsComponentType<ComponentD>.Register();
+```
 Create world
 
 ```csharp
@@ -158,6 +166,22 @@ engine.AddSystem(new SystemC());
 // update order C -> A -> B
 engine.Update(0.1f, world);
 ```
+### [Serialization. Deserialization. Div Compression](https://github.com/voledyhil/BinarySerializer)
+Serialize world with filter 
+```csharp
+byte[] data = _world.Serialize(filterBDnA);
+```
+Deserialize to target world
+```csharp
+EcsWorld targetWorld = new EcsWorld();
+targetWorld.Update(data);
+```
+Partial serialize world with filter
+```csharp
+Baseline<uint> baseline = new Baseline<uint>();
+data = _world.Serialize(filterBDnA, baseline);
+```
+
 ## Examples
 ### [MiniEcsPhysics](https://github.com/voledyhil/MiniEcsPhysics)
 Implementing a simple 2D isometric physical using MiniEcs framework
@@ -174,12 +198,14 @@ Intel Core i7-8850H CPU 2.60GHz (Coffee Lake), 1 CPU, 12 logical and 6 physical 
   [Host]     : .NET Core 2.2.5 (CoreCLR 4.6.27617.05, CoreFX 4.6.27618.01), X64 RyuJIT
   DefaultJob : .NET Core 2.2.5 (CoreCLR 4.6.27617.05, CoreFX 4.6.27618.01), X64 RyuJIT
 ```
-|            Method |        Mean |      Error |     StdDev |    Gen 0 |   Gen 1 | Gen 2 | Allocated |
-|------------------ |------------:|-----------:|-----------:|---------:|--------:|------:|----------:|
-| EntitasStressTest | 8,846.89 us | 170.380 us | 151.037 us |  78.1250 | 31.2500 |     - |  491640 B |
-| MiniEcsStressTest | 1,202.59 us |  16.617 us |  15.543 us | 138.6719 | 44.9219 |     - |  716312 B |
-|    EntitasForEach |   711.27 us |  16.047 us |  47.063 us |        - |       - |     - |     272 B |
-|    MiniEcsForEach |    42.32 us |   0.171 us |   0.143 us |   0.1831 |       - |     - |     944 B |
+|                Method |         Mean |      Error |     StdDev |       Median |    Gen 0 |   Gen 1 | Gen 2 |  Allocated |
+|---------------------- |-------------:|-----------:|-----------:|-------------:|---------:|--------:|------:|-----------:|
+| MiniEcsForEachOneComp |     62.76 us |   0.475 us |   0.371 us |     62.69 us |   0.1221 |       - |     - |      944 B |
+| MiniEcsForEachTwoComp |     86.57 us |   1.181 us |   1.047 us |     86.69 us |   0.1221 |       - |     - |      944 B |
+|     MiniEcsStressTest |  1,664.66 us |  33.405 us |  97.443 us |  1,653.71 us | 146.4844 | 50.7813 |     - |   717256 B |
+| EntitasForEachOneComp |  2,150.14 us | 152.466 us | 449.550 us |  2,020.88 us |        - |       - |     - |      272 B |
+| EntitasForEachTwoComp |  2,730.73 us | 199.546 us | 588.365 us |  2,637.36 us |        - |       - |     - |      272 B |
+|     EntitasStressTest | 15,593.49 us | 309.112 us | 631.433 us | 15,421.15 us |  62.5000 | 31.2500 |     - | 10977674 B |
 
 ## References
 1. Building an ECS #2: Archetypes and Vectorization (https://medium.com/@ajmmertens/building-an-ecs-2-archetypes-and-vectorization-fe21690805f9)
