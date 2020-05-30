@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Order;
 using Entitas;
 using MiniEcs.Core;
 using EcsFilter = MiniEcs.Core.EcsFilter;
@@ -9,9 +10,10 @@ using EntitasWorld = Entitas.IContext<Entitas.Entity>;
 
 namespace MiniEcs.Benchmark
 {
+    [Orderer(SummaryOrderPolicy.FastestToSlowest)]
     [MemoryDiagnoser]
     public class ComplexTest
-    {       
+    {        
         private class EntitasComponentA : IComponent
         {
             public int Value;
@@ -23,6 +25,7 @@ namespace MiniEcs.Benchmark
 
         private class EntitasComponentC : IComponent
         {
+            public int Value;
         }
 
         private class EntitasComponentD : IComponent
@@ -42,6 +45,7 @@ namespace MiniEcs.Benchmark
 
         private class MiniEcsComponentC : IEcsComponent
         {
+            public int Value;
         }
 
         private class MiniEcsComponentD : IEcsComponent
@@ -51,13 +55,20 @@ namespace MiniEcs.Benchmark
         private EntitasWorld _entitasWorld;
         private EcsWorld _world;
 
+        
         [GlobalSetup]
         public void Setup()
         {
-            _entitasWorld = new Context<EntitasEntity>(4, () => new EntitasEntity());
-            _world = new EcsWorld();
+            EcsComponentType<MiniEcsComponentA>.Register();
+            EcsComponentType<MiniEcsComponentB>.Register();
+            EcsComponentType<MiniEcsComponentC>.Register();
+            EcsComponentType<MiniEcsComponentD>.Register();
 
-            for (int i = 0; i < 10000; ++i)
+            _world = new EcsWorld();
+            
+            _entitasWorld = new Context<EntitasEntity>(4, () => new EntitasEntity());
+
+            for (int i = 0; i < 15000; ++i)
             {
                 EntitasEntity entity = _entitasWorld.CreateEntity();
                 entity.AddComponent(0, new EntitasComponentA());
@@ -97,7 +108,7 @@ namespace MiniEcs.Benchmark
                 _world.CreateEntity(new MiniEcsComponentA(), new MiniEcsComponentD());
             }
         }
-        
+
         [Benchmark]
         public void EntitasStressTest()
         {
@@ -133,7 +144,7 @@ namespace MiniEcs.Benchmark
                 EntitasEntity entityAD = _entitasWorld.CreateEntity();
                 entityAD.AddComponent(0, new EntitasComponentA());
                 entityAD.AddComponent(3, new EntitasComponentD());
-                
+
                 entities.Add(entityABD);
                 entities.Add(entityAC);
                 entities.Add(entityBD0);
@@ -143,11 +154,8 @@ namespace MiniEcs.Benchmark
                 entities.Add(entityAD);
             }
 
-            foreach (Entity entity in _entitasWorld.GetGroup(Matcher<EntitasEntity>.AllOf(0).NoneOf(1, 3)))
-            {
-                EntitasComponentA comp = (EntitasComponentA) entity.GetComponent(0);
-                comp.Value++;
-            }
+            EntitasForEachOneComp();
+            EntitasForEachTwoComp();
 
             foreach (Entity entity in entities)
             {
@@ -162,7 +170,8 @@ namespace MiniEcs.Benchmark
 
             for (int i = 0; i < 1000; i++)
             {
-                IEcsEntity entityABD = _world.CreateEntity(new MiniEcsComponentA(), new MiniEcsComponentB(), new MiniEcsComponentD());
+                IEcsEntity entityABD = _world.CreateEntity(new MiniEcsComponentA(), new MiniEcsComponentB(),
+                    new MiniEcsComponentD());
                 IEcsEntity entityAC = _world.CreateEntity(new MiniEcsComponentA(), new MiniEcsComponentC());
                 IEcsEntity entityBD0 = _world.CreateEntity(new MiniEcsComponentB(), new MiniEcsComponentD());
                 IEcsEntity entityBD1 = _world.CreateEntity(new MiniEcsComponentB(), new MiniEcsComponentD());
@@ -179,17 +188,18 @@ namespace MiniEcs.Benchmark
                 entities.Add(entityAD);
             }
 
-            IEcsGroup ecsGroup = _world.Filter(new EcsFilter().AllOf<MiniEcsComponentA>().NoneOf<MiniEcsComponentB, MiniEcsComponentD>());
-            ecsGroup.ForEach((IEcsEntity entity, MiniEcsComponentA component) => { component.Value++; });
+            MiniEcsForEachOneComp();
+            MiniEcsForEachTwoComp();
             
             foreach (IEcsEntity entity in entities)
             {
                 entity.Destroy();
             }
         }
+
         
         [Benchmark]
-        public void EntitasForEach()
+        public void EntitasForEachOneComp()
         {
             foreach (Entity entity in _entitasWorld.GetGroup(Matcher<EntitasEntity>.AllOf(0).NoneOf(1, 3)))
             {
@@ -198,13 +208,38 @@ namespace MiniEcs.Benchmark
             }
         }
         
+        [Benchmark]
+        public void EntitasForEachTwoComp()
+        {
+            foreach (Entity entity in _entitasWorld.GetGroup(Matcher<EntitasEntity>.AllOf(0, 2).NoneOf(1, 3)))
+            {
+                EntitasComponentA compA = (EntitasComponentA) entity.GetComponent(0);
+                EntitasComponentC compC = (EntitasComponentC) entity.GetComponent(2);
+                compA.Value++;
+                compC.Value++;
+            }
+        }
+        
 
         [Benchmark]
-        public void MiniEcsForEach()
+        public void MiniEcsForEachOneComp()
         {
-            IEcsGroup ecsGroup = _world.Filter(new EcsFilter().AllOf<MiniEcsComponentA>().NoneOf<MiniEcsComponentB, MiniEcsComponentD>());
-            
-            ecsGroup.ForEach((IEcsEntity entity, MiniEcsComponentA component) => { component.Value++; });
+            _world.Filter(new EcsFilter().AllOf<MiniEcsComponentA>().NoneOf<MiniEcsComponentB, MiniEcsComponentD>())
+                .ForEach((IEcsEntity entity, MiniEcsComponentA compA) =>
+                {
+                    compA.Value++;
+                });
+        }
+        
+        [Benchmark]
+        public void MiniEcsForEachTwoComp()
+        {
+            _world.Filter(new EcsFilter().AllOf<MiniEcsComponentA, MiniEcsComponentC>().NoneOf<MiniEcsComponentB, MiniEcsComponentD>())
+                .ForEach((IEcsEntity entity, MiniEcsComponentA compA, MiniEcsComponentC compC) =>
+                {
+                    compA.Value++;
+                    compC.Value++;
+                });
         }
 
     }

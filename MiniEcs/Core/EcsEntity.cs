@@ -5,10 +5,11 @@ namespace MiniEcs.Core
     public interface IEcsEntity
     {
         uint Id { get; }
-        bool HasComponent<TC>() where TC : IEcsComponent;
-        TC GetComponent<TC>() where TC : IEcsComponent;
-        void AddComponent<TC>(TC component) where TC : IEcsComponent;
-        void RemoveComponent<TC>() where TC : IEcsComponent;
+        int ComponentsCount { get; }
+        bool HasComponent<TC>() where TC : class, IEcsComponent, new();
+        TC GetComponent<TC>() where TC : class, IEcsComponent, new();
+        void AddComponent<TC>(TC component) where TC : class, IEcsComponent, new();
+        void RemoveComponent<TC>() where TC : class, IEcsComponent, new();
         void Destroy();
     }
 
@@ -26,6 +27,8 @@ namespace MiniEcs.Core
         /// Unique identifier of an entity
         /// </summary>
         public uint Id { get; private set; }
+
+        public int ComponentsCount => _archetype.Indices.Length;
 
         /// <summary>
         /// Current Entity Archetype
@@ -46,7 +49,7 @@ namespace MiniEcs.Core
             _archetype.AddEntity(this);
         }
 
-        public void Initialize<TC0>(uint id, TC0 component0) where TC0 : IEcsComponent
+        public void Initialize<TC0>(uint id, TC0 component0) where TC0 : class, IEcsComponent, new()
         {
             Id = id;
 
@@ -58,7 +61,8 @@ namespace MiniEcs.Core
         }
 
         public void Initialize<TC0, TC1>(uint id, TC0 component0, TC1 component1)
-            where TC0 : IEcsComponent where TC1 : IEcsComponent
+            where TC0 : class, IEcsComponent, new() 
+            where TC1 : class, IEcsComponent, new()
         {
             Id = id;
 
@@ -72,7 +76,9 @@ namespace MiniEcs.Core
         }
 
         public void Initialize<TC0, TC1, TC2>(uint id, TC0 component0, TC1 component1, TC2 component2)
-            where TC0 : IEcsComponent where TC1 : IEcsComponent where TC2 : IEcsComponent
+            where TC0 : class, IEcsComponent, new()
+            where TC1 : class, IEcsComponent, new()
+            where TC2 : class, IEcsComponent, new()
         {
             Id = id;
 
@@ -87,8 +93,12 @@ namespace MiniEcs.Core
             _archetype.AddEntity(this);
         }
 
-        public void Initialize<TC0, TC1, TC2, TC3>(uint id, TC0 component0, TC1 component1, TC2 component2, TC3 component3)
-            where TC0 : IEcsComponent where TC1 : IEcsComponent where TC2 : IEcsComponent where TC3 : IEcsComponent
+        public void Initialize<TC0, TC1, TC2, TC3>(uint id, TC0 component0, TC1 component1, TC2 component2,
+            TC3 component3)
+            where TC0 : class, IEcsComponent, new()
+            where TC1 : class, IEcsComponent, new()
+            where TC2 : class, IEcsComponent, new()
+            where TC3 : class, IEcsComponent, new()
         {
             Id = id;
 
@@ -105,15 +115,22 @@ namespace MiniEcs.Core
             _archetype.AddEntity(this);
         }
 
+
+
         /// <summary>
         /// Determines whether the specified component type is contained in an entity.
         /// </summary>
         /// <returns>
         /// true if the entity contains a component of the specified type; otherwise, false.
         /// </returns>
-        public bool HasComponent<TC>() where TC : IEcsComponent
+        public bool HasComponent<TC>() where TC : class, IEcsComponent, new()
         {
-            return _archetype.SetIndices.Contains(EcsComponentType<TC>.Index);
+            return HasComponent(EcsComponentType<TC>.Index);
+        }
+
+        internal bool HasComponent(byte index)
+        {
+            return _archetype.SetIndices.Contains(index);
         }
 
         /// <summary>
@@ -123,12 +140,17 @@ namespace MiniEcs.Core
         /// <exception cref="InvalidOperationException">
         /// A component with the specified type does not exist
         /// </exception>
-        public TC GetComponent<TC>() where TC : IEcsComponent
+        public TC GetComponent<TC>() where TC : class, IEcsComponent, new()
         {
             if (!HasComponent<TC>())
                 throw new InvalidOperationException();
 
             return _archetype.GetComponentPool<TC>().GetTyped(ArchetypeIndex);
+        }
+
+        internal IEcsComponent GetComponent(byte index)
+        {
+            return _archetype.GetComponentPool(index).Get(ArchetypeIndex);
         }
 
         /// <summary>
@@ -138,17 +160,19 @@ namespace MiniEcs.Core
         /// <exception cref="ArgumentException">
         /// A component with the specified type already exists OR component is NULL
         /// </exception>
-        public void AddComponent<TC>(TC component) where TC : IEcsComponent
+        public void AddComponent<TC>(TC component) where TC : class, IEcsComponent, new()
         {
-            if (HasComponent<TC>() || component == null)
-                throw new ArgumentException();
-
             byte index = EcsComponentType<TC>.Index;
-            EcsArchetype newArchetype = _archetypeManager.FindOrCreateNextArchetype(_archetype, index);
+            if (HasComponent(index) || component == null)
+                throw new ArgumentException();
+            AddComponent(index, component);
+        }
 
-            for (int i = 0; i < _archetype.IndicesCount; i++)
+        internal void AddComponent(byte index, IEcsComponent component)
+        {
+            EcsArchetype newArchetype = _archetypeManager.FindOrCreateNextArchetype(_archetype, index);
+            foreach (byte curIndex in _archetype.Indices)
             {
-                byte curIndex = _archetype.Indices[i];
                 IEcsComponentPool componentPool = _archetype.GetComponentPool(curIndex);
                 newArchetype.AddComponent(curIndex, componentPool.Get(ArchetypeIndex));
             }
@@ -166,17 +190,19 @@ namespace MiniEcs.Core
         /// <exception cref="InvalidOperationException">
         /// A component with the specified type does not exist
         /// </exception>
-        public void RemoveComponent<TC>() where TC : IEcsComponent
+        public void RemoveComponent<TC>() where TC : class, IEcsComponent, new()
         {
-            if (!HasComponent<TC>())
-                throw new InvalidOperationException();
-
             byte index = EcsComponentType<TC>.Index;
-            EcsArchetype newArchetype = _archetypeManager.FindOrCreatePriorArchetype(_archetype, index);
+            if (!HasComponent(index))
+                throw new InvalidOperationException();
+            RemoveComponent(index);
+        }
 
-            for (int i = 0; i < _archetype.IndicesCount; i++)
+        internal void RemoveComponent(byte index)
+        {
+            EcsArchetype newArchetype = _archetypeManager.FindOrCreatePriorArchetype(_archetype, index);
+            foreach (byte curIndex in _archetype.Indices)
             {
-                byte curIndex = _archetype.Indices[i];
                 if (curIndex == index)
                     continue;
 

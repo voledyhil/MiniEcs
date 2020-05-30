@@ -10,8 +10,13 @@ namespace MiniEcs.Core
     /// EcsWorld maintains a list of archetypes and organizes object-related data
     /// for optimal performance.
     /// </summary>
-    public class EcsWorld
+    public partial class EcsWorld
     {
+        /// <summary>
+        /// Number of existing Entities
+        /// </summary>
+        public int EntitiesCount => _entities.Count;
+
         /// <summary>
         /// Number of existing archetypes
         /// </summary>
@@ -23,6 +28,13 @@ namespace MiniEcs.Core
         public int EntitiesInProcessing => _entitiesPool.Count;
 
         /// <summary>
+        /// Get entity by Id
+        /// </summary>
+        /// <param name="id">Entity Id</param>
+        public IEcsEntity this[uint id] => _entities[id];
+
+
+        /// <summary>
         /// Entity unique identifier generator
         /// </summary>
         private uint _entityCounter;
@@ -31,6 +43,11 @@ namespace MiniEcs.Core
         /// Stores a group of archetypes for the specified filter.
         /// </summary>
         private readonly Dictionary<EcsFilter, EcsGroup> _groups = new Dictionary<EcsFilter, EcsGroup>();
+
+        /// <summary>
+        /// All exist entities
+        /// </summary>
+        private readonly Dictionary<uint, EcsEntityExtended> _entities = new Dictionary<uint, EcsEntityExtended>();
 
         /// <summary>
         /// Pool of entities sent for processing
@@ -47,48 +64,65 @@ namespace MiniEcs.Core
         public IEcsEntity CreateEntity()
         {
             EcsEntityExtended entity = _entitiesPool.Count <= 0
-                ? new EcsEntityExtended(_entitiesPool, _archetypeManager)
+                ? new EcsEntityExtended(_entitiesPool, _entities, _archetypeManager)
                 : _entitiesPool.Dequeue();
-            entity.Initialize(_entityCounter++);
+            uint id = _entityCounter++;
+            entity.Initialize(id);
+            _entities.Add(id, entity);
             return entity;
         }
 
-        public IEcsEntity CreateEntity<TC0>(TC0 component0) where TC0 : IEcsComponent
+        public IEcsEntity CreateEntity<TC0>(TC0 component0) where TC0 : class, IEcsComponent, new()
         {
             EcsEntityExtended entity = _entitiesPool.Count <= 0
-                ? new EcsEntityExtended(_entitiesPool, _archetypeManager)
+                ? new EcsEntityExtended(_entitiesPool, _entities, _archetypeManager)
                 : _entitiesPool.Dequeue();
-            entity.Initialize(_entityCounter++, component0);
+            uint id = _entityCounter++;
+            entity.Initialize(id, component0);
+            _entities.Add(id, entity);
             return entity;
         }
 
         public IEcsEntity CreateEntity<TC0, TC1>(TC0 component0, TC1 component1)
-            where TC0 : IEcsComponent where TC1 : IEcsComponent
+            where TC0 : class, IEcsComponent, new() 
+            where TC1 : class, IEcsComponent, new()
         {
             EcsEntityExtended entity = _entitiesPool.Count <= 0
-                ? new EcsEntityExtended(_entitiesPool, _archetypeManager)
+                ? new EcsEntityExtended(_entitiesPool, _entities, _archetypeManager)
                 : _entitiesPool.Dequeue();
-            entity.Initialize(_entityCounter++, component0, component1);
+            uint id = _entityCounter++;
+            entity.Initialize(id, component0, component1);
+            _entities.Add(id, entity);
             return entity;
         }
 
-        public IEcsEntity CreateEntity<TC0, TC1, TC2>(TC0 component0, TC1 component1, TC2 component2) where TC0 : IEcsComponent
-            where TC1 : IEcsComponent where TC2 : IEcsComponent
+        public IEcsEntity CreateEntity<TC0, TC1, TC2>(TC0 component0, TC1 component1, TC2 component2)
+            where TC0 : class, IEcsComponent, new()
+            where TC1 : class, IEcsComponent, new()
+            where TC2 : class, IEcsComponent, new()
         {
             EcsEntityExtended entity = _entitiesPool.Count <= 0
-                ? new EcsEntityExtended(_entitiesPool, _archetypeManager)
+                ? new EcsEntityExtended(_entitiesPool, _entities, _archetypeManager)
                 : _entitiesPool.Dequeue();
-            entity.Initialize(_entityCounter++, component0, component1, component2);
+            uint id = _entityCounter++;
+            entity.Initialize(id, component0, component1, component2);
+            _entities.Add(id, entity);
             return entity;
         }
 
-        public IEcsEntity CreateEntity<TC0, TC1, TC2, TC3>(TC0 component0, TC1 component1, TC2 component2, TC3 component3)
-            where TC0 : IEcsComponent where TC1 : IEcsComponent where TC2 : IEcsComponent where TC3 : IEcsComponent
+        public IEcsEntity CreateEntity<TC0, TC1, TC2, TC3>(TC0 component0, TC1 component1, TC2 component2,
+            TC3 component3)
+            where TC0 : class, IEcsComponent, new()
+            where TC1 : class, IEcsComponent, new()
+            where TC2 : class, IEcsComponent, new()
+            where TC3 : class, IEcsComponent, new()
         {
             EcsEntityExtended entity = _entitiesPool.Count <= 0
-                ? new EcsEntityExtended(_entitiesPool, _archetypeManager)
+                ? new EcsEntityExtended(_entitiesPool, _entities, _archetypeManager)
                 : _entitiesPool.Dequeue();
-            entity.Initialize(_entityCounter++, component0, component1, component2, component3);
+            uint id = _entityCounter++;
+            entity.Initialize(id, component0, component1, component2, component3);
+            _entities.Add(id, entity);
             return entity;
         }
 
@@ -105,19 +139,25 @@ namespace MiniEcs.Core
             return component;
         }
 
-        public IEcsArchetype GetArchetype<TC>() where TC : IEcsComponent
+        public IEcsArchetype GetArchetype<TC>() where TC : class, IEcsComponent, new()
         {
             return _archetypeManager.FindOrCreateArchetype(EcsComponentType<TC>.Index);
         }
-        
-        public IEcsArchetype GetArchetype<TC0, TC1>() where TC0 : IEcsComponent where TC1 : IEcsComponent
+
+        public IEcsArchetype GetArchetype<TC0, TC1>() 
+            where TC0 : class, IEcsComponent, new()
+            where TC1 : class, IEcsComponent, new()
         {
             return _archetypeManager.FindOrCreateArchetype(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index);
         }
-        
-        public IEcsArchetype GetArchetype<TC0, TC1, TC2>() where TC0 : IEcsComponent where TC1 : IEcsComponent where TC2 : IEcsComponent
+
+        public IEcsArchetype GetArchetype<TC0, TC1, TC2>() 
+            where TC0 : class, IEcsComponent, new()
+            where TC1 : class, IEcsComponent, new()
+            where TC2 : class, IEcsComponent, new()
         {
-            return _archetypeManager.FindOrCreateArchetype(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index, EcsComponentType<TC2>.Index);
+            return _archetypeManager.FindOrCreateArchetype(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index,
+                EcsComponentType<TC2>.Index);
         }
 
         /// <summary>
@@ -225,15 +265,19 @@ namespace MiniEcs.Core
         private class EcsEntityExtended : EcsEntity
         {
             private readonly Queue<EcsEntityExtended> _entitiesPool;
+            private readonly Dictionary<uint, EcsEntityExtended> _entities;
 
-            public EcsEntityExtended(Queue<EcsEntityExtended> entitiesPool, EcsArchetypeManager archetypeManager) :
+            public EcsEntityExtended(Queue<EcsEntityExtended> entitiesPool,
+                Dictionary<uint, EcsEntityExtended> entities, EcsArchetypeManager archetypeManager) :
                 base(archetypeManager)
             {
                 _entitiesPool = entitiesPool;
+                _entities = entities;
             }
 
             protected override void OnDestroy()
             {
+                _entities.Remove(Id);
                 _entitiesPool.Enqueue(this);
             }
         }

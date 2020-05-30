@@ -158,7 +158,7 @@ namespace MiniEcs.Core
 
             bool added = false;
             int length = 0;
-            byte[] indices = new byte[archetype.IndicesCount + 1];
+            byte[] indices = new byte[archetype.Indices.Length + 1];
             foreach (byte index in archetype.Indices)
             {
                 if (addIndex < index && !added)
@@ -191,7 +191,7 @@ namespace MiniEcs.Core
                 return priorArchetype;
 
             int length = 0;
-            byte[] indices = new byte[archetype.IndicesCount - 1];
+            byte[] indices = new byte[archetype.Indices.Length - 1];
             foreach (byte index in archetype.Indices)
             {
                 if (index != removeIndex)

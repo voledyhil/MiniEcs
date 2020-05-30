@@ -16,3 +16,4 @@ MiniEcs.Benchmark/obj
 MiniEcs.Benchmark/LeoECS
 MiniEcs.Benchmark/Svelto.Common
 MiniEcs.Benchmark/Svelto.ECS
+MiniEcs/BinarySerializer/.idea/

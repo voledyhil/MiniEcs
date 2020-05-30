@@ -1,29 +1,13 @@
 using System;
 using System.Collections.Generic;
+using BinarySerializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MiniEcs.Core;
 
 namespace MiniEcs.Tests.Core
 {
- 
-    public class ComponentA : IEcsComponent
-    {
-    }
-
-    public class ComponentB : IEcsComponent
-    {
-    }
-
-    public class ComponentC : IEcsComponent
-    {
-    }
-
-    public class ComponentD : IEcsComponent
-    {
-    }
-    
     [TestClass]
-    public class EcsWorldTest
+    public partial class EcsWorldTest
     {
         private static EcsWorld _world;
         private static IEcsEntity _entityAB;
@@ -37,15 +21,20 @@ namespace MiniEcs.Tests.Core
         [ClassInitialize]
         public static void InitFilterWorld(TestContext testContext)
         {
+            EcsComponentType<ComponentA>.Register();
+            EcsComponentType<ComponentB>.Register();
+            EcsComponentType<ComponentC>.Register();
+            EcsComponentType<ComponentD>.Register();
+
             _world = new EcsWorld();
 
-            _entityABD = _world.CreateEntity(new ComponentA(), new ComponentB(), new ComponentD());
-            _entityAC = _world.CreateEntity(new ComponentA(), new ComponentC());
-            _entityBD0 = _world.CreateEntity(new ComponentB(), new ComponentD());
-            _entityBD1 = _world.CreateEntity(new ComponentD(), new ComponentB());
-            _entityBC = _world.CreateEntity(new ComponentC(), new ComponentB());
-            _entityAB = _world.CreateEntity(new ComponentB(), new ComponentA());
-            _entityAD = _world.CreateEntity(new ComponentA(), new ComponentD());
+            _entityABD = _world.CreateEntity(new ComponentA {Value = 1}, new ComponentB {Value = 2}, new ComponentD {Value = 3});
+            _entityAC = _world.CreateEntity(new ComponentA {Value = 4}, new ComponentC {Value = 5});
+            _entityBD0 = _world.CreateEntity(new ComponentB {Value = 6}, new ComponentD {Value = 7});
+            _entityBD1 = _world.CreateEntity(new ComponentD {Value = 8}, new ComponentB {Value = 8});
+            _entityBC = _world.CreateEntity(new ComponentC {Value = 9}, new ComponentB {Value = 10});
+            _entityAB = _world.CreateEntity(new ComponentB {Value = 11}, new ComponentA {Value = 12});
+            _entityAD = _world.CreateEntity(new ComponentA {Value = 13}, new ComponentD {Value = 14});
         }
 
         [TestMethod]

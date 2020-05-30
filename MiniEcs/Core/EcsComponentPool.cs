@@ -5,6 +5,7 @@ namespace MiniEcs.Core
     public interface IEcsComponentPoolCreator
     {
         IEcsComponentPool InstantiatePool();
+        IEcsComponent CreateComponent();
     }
 
     public interface IEcsComponentPool
@@ -16,15 +17,20 @@ namespace MiniEcs.Core
     }
 
 
-    public class EcsComponentPoolCreator<TC> : IEcsComponentPoolCreator where TC : IEcsComponent
+    public class EcsComponentPoolCreator<TC> : IEcsComponentPoolCreator where TC : class, IEcsComponent, new()
     {
         public IEcsComponentPool InstantiatePool()
         {
             return new EcsComponentPool<TC>();
         }
+
+        public IEcsComponent CreateComponent()
+        {
+            return new TC();
+        }
     }
 
-    public class EcsComponentPool<TC> : IEcsComponentPool where TC : IEcsComponent
+    public class EcsComponentPool<TC> : IEcsComponentPool where TC : class, IEcsComponent, new()
     {
         private TC[] _comps = new TC[1];
 

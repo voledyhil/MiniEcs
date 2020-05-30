@@ -20,7 +20,7 @@ namespace MiniEcs.Core
         /// At least one of the component types in this array must exist in the archetype
         /// </summary>
         /// <returns>Current filter</returns>
-        public EcsFilter AnyOf<TC0>() where TC0 : IEcsComponent
+        public EcsFilter AnyOf<TC0>() where TC0 : class, IEcsComponent, new()
         {
             return AnyOf(EcsComponentType<TC0>.Index);
         }
@@ -29,7 +29,9 @@ namespace MiniEcs.Core
         /// At least one of the component types in this array must exist in the archetype
         /// </summary>
         /// <returns></returns>
-        public EcsFilter AnyOf<TC0, TC1>() where TC0 : IEcsComponent where TC1 : IEcsComponent
+        public EcsFilter AnyOf<TC0, TC1>() 
+            where TC0 : class, IEcsComponent, new()
+            where TC1 : class, IEcsComponent, new()
         {
             return AnyOf(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index);
         }
@@ -38,7 +40,10 @@ namespace MiniEcs.Core
         /// At least one of the component types in this array must exist in the archetype
         /// </summary>
         /// <returns>Current filter</returns>
-        public EcsFilter AnyOf<TC0, TC1, TC2>() where TC0 : IEcsComponent where TC1 : IEcsComponent where TC2 : IEcsComponent
+        public EcsFilter AnyOf<TC0, TC1, TC2>() 
+            where TC0 : class, IEcsComponent, new()
+            where TC1 : class, IEcsComponent, new()
+            where TC2 : class, IEcsComponent, new()
         {
             return AnyOf(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index, EcsComponentType<TC2>.Index);
         }
@@ -64,7 +69,7 @@ namespace MiniEcs.Core
         /// All component types in this array must exist in the archetype
         /// </summary>
         /// <returns>Current filter</returns>
-        public EcsFilter AllOf<TC0>() where TC0 : IEcsComponent
+        public EcsFilter AllOf<TC0>() where TC0 : class, IEcsComponent, new()
         {
             return AllOf(EcsComponentType<TC0>.Index);
         }
@@ -73,7 +78,9 @@ namespace MiniEcs.Core
         /// All component types in this array must exist in the archetype
         /// </summary>
         /// <returns>Current filter</returns>
-        public EcsFilter AllOf<TC0, TC1>() where TC0 : IEcsComponent where TC1 : IEcsComponent
+        public EcsFilter AllOf<TC0, TC1>() 
+            where TC0 : class, IEcsComponent, new()
+            where TC1 : class, IEcsComponent, new()
         {
             return AllOf(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index);
         }
@@ -82,7 +89,10 @@ namespace MiniEcs.Core
         /// All component types in this array must exist in the archetype
         /// </summary>
         /// <returns>Current filter</returns>
-        public EcsFilter AllOf<TC0, TC1, TC2>() where TC0 : IEcsComponent where TC1 : IEcsComponent where TC2 : IEcsComponent
+        public EcsFilter AllOf<TC0, TC1, TC2>()
+            where TC0 : class, IEcsComponent, new()
+            where TC1 : class, IEcsComponent, new()
+            where TC2 : class, IEcsComponent, new()
         {
             return AllOf(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index, EcsComponentType<TC2>.Index);
         }
@@ -91,10 +101,10 @@ namespace MiniEcs.Core
         /// All component types in this array must exist in the archetype
         /// </summary>
         /// <returns>Current filter</returns>
-        public EcsFilter AllOf<TC0, TC1, TC2, TC3>() where TC0 : IEcsComponent
-            where TC1 : IEcsComponent
-            where TC2 : IEcsComponent
-            where TC3 : IEcsComponent
+        public EcsFilter AllOf<TC0, TC1, TC2, TC3>() where TC0 : class, IEcsComponent, new()
+            where TC1 : class, IEcsComponent, new()
+            where TC2 : class, IEcsComponent, new()
+            where TC3 : class, IEcsComponent, new()
         {
             return AllOf(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index, EcsComponentType<TC2>.Index,
                 EcsComponentType<TC3>.Index);
@@ -121,7 +131,7 @@ namespace MiniEcs.Core
         /// None of the component types in this array can exist in the archetype
         /// </summary>
         /// <returns>Current filter</returns>
-        public EcsFilter NoneOf<TC0>() where TC0 : IEcsComponent
+        public EcsFilter NoneOf<TC0>() where TC0 : class, IEcsComponent, new()
         {
             return NoneOf(EcsComponentType<TC0>.Index);
         }
@@ -130,7 +140,9 @@ namespace MiniEcs.Core
         /// None of the component types in this array can exist in the archetype 
         /// </summary>
         /// <returns>Current filter</returns>
-        public EcsFilter NoneOf<TC0, TC1>() where TC0 : IEcsComponent where TC1 : IEcsComponent
+        public EcsFilter NoneOf<TC0, TC1>() 
+            where TC0 : class, IEcsComponent, new()
+            where TC1 : class, IEcsComponent, new()
         {
             return NoneOf(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index);
         }
@@ -139,7 +151,10 @@ namespace MiniEcs.Core
         /// None of the component types in this array can exist in the archetype
         /// </summary>
         /// <returns>Current filter</returns>
-        public EcsFilter NoneOf<TC0, TC1, TC2>() where TC0 : IEcsComponent where TC1 : IEcsComponent where TC2 : IEcsComponent
+        public EcsFilter NoneOf<TC0, TC1, TC2>() 
+            where TC0 : class, IEcsComponent, new()
+            where TC1 : class, IEcsComponent, new()
+            where TC2 : class, IEcsComponent, new()
         {
             return NoneOf(EcsComponentType<TC0>.Index, EcsComponentType<TC1>.Index, EcsComponentType<TC2>.Index);
         }
