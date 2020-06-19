@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
 using BinarySerializer.Data;
-using BinarySerializer.Expressions;
 using BinarySerializer.Serializers.Baselines;
 
 namespace BinarySerializer.Serializers
@@ -10,7 +9,7 @@ namespace BinarySerializer.Serializers
         where TKey : unmanaged where TChildKey : unmanaged
     {
         private readonly TKey _index;
-        private readonly Getter<object> _getter;
+        private readonly Func<object, object> _getter;
         private readonly IBinarySerializer _serializer;
         private readonly int _valuesCount;
 
@@ -19,7 +18,7 @@ namespace BinarySerializer.Serializers
             _index = index;
             _serializer = serializer;
             _valuesCount = valuesCount;
-            _getter = new Getter<object>(ownerType, field);
+            _getter = Expressions.Expressions.InstantiateGetter<object>(ownerType, field);
         }
 
         protected abstract void WriteKey(TKey index, BinaryDataWriter writer);
@@ -28,14 +27,14 @@ namespace BinarySerializer.Serializers
         {
             using (BinaryDataReader childReader = reader.ReadNode())
             {
-                _serializer.Update(_getter.Get(obj), childReader);
+                _serializer.Update(_getter(obj), childReader);
             }
         }
 
         public void Serialize(object obj, BinaryDataWriter writer)
         {
             BinaryDataWriter childWriter = writer.TryWriteNode(sizeof(byte));
-            _serializer.Serialize(_getter.Get(obj), childWriter);
+            _serializer.Serialize(_getter(obj), childWriter);
 
             if (childWriter.Length <= 0)
                 return;
@@ -53,7 +52,7 @@ namespace BinarySerializer.Serializers
         {
             BinaryDataWriter childWriter = writer.TryWriteNode(sizeof(byte));
             Baseline<TChildKey> itemBaseline = baseline.GetOrCreateBaseline<Baseline<TChildKey>>(_index, _valuesCount, out bool isNew);
-            _serializer.Serialize(_getter.Get(obj), childWriter, itemBaseline);
+            _serializer.Serialize(_getter(obj), childWriter, itemBaseline);
 
             if (childWriter.Length <= 0 && !isNew)
                 return;

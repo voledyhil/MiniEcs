@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using BinarySerializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MiniEcs.Core;
 

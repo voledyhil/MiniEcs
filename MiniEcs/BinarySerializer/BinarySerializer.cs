@@ -27,7 +27,7 @@ namespace BinarySerializer
         private static readonly StringWriter StringWriter = new StringWriter();
 
         private static readonly IDictionary<Type, CompositeBinarySerializer> Serializers = new Dictionary<Type, CompositeBinarySerializer>();
-        private static readonly IDictionary<Type, Creator> Creators = new Dictionary<Type, Creator>();
+        private static readonly IDictionary<Type, ObjectActivator> Creators = new Dictionary<Type, ObjectActivator>();
 
         public static byte[] Serialize(object obj)
         {
@@ -171,9 +171,9 @@ namespace BinarySerializer
                         Type valueType = fieldType.GenericTypeArguments[0];
                         CompositeBinarySerializer valueSer = GetSerializer(valueType);
 
-                        if (!Creators.TryGetValue(valueType, out Creator itemCreator))
+                        if (!Creators.TryGetValue(valueType, out ObjectActivator itemCreator))
                         {
-                            itemCreator = new Creator(valueType.GetConstructor(new Type[] { }));
+                            itemCreator = Expressions.Expressions.InstantiateCreator(valueType.GetConstructor(new Type[] { }));
                             Creators.Add(valueType, itemCreator);
                         }
 

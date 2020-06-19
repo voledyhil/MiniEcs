@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
 using BinarySerializer.Data;
-using BinarySerializer.Expressions;
 using BinarySerializer.Serializers.Baselines;
 
 namespace BinarySerializer.Serializers
@@ -11,15 +10,15 @@ namespace BinarySerializer.Serializers
     {
         private readonly byte _index;
         private readonly TWriter _writer;
-        private readonly Getter<T> _getter;
-        private readonly Setter<T> _setter;
+        private readonly Func<object, T> _getter;
+        private readonly Action<object, T> _setter;
 
         protected PrimitiveBinarySerializer(byte index, Type ownerType, FieldInfo field, TWriter writer)
         {
             _index = index;
             _writer = writer;
-            _getter = new Getter<T>(ownerType, field);
-            _setter = new Setter<T>(ownerType, field);
+            _getter = Expressions.Expressions.InstantiateGetter<T>(ownerType, field);
+            _setter = Expressions.Expressions.InstantiateSetter<T>(ownerType, field);
         }
 
         void IBinarySerializer.Serialize(object obj, BinaryDataWriter writer, IBaseline baseline)
@@ -29,7 +28,7 @@ namespace BinarySerializer.Serializers
 
         public void Serialize(object obj, BinaryDataWriter writer)
         {
-            T value = _getter.Get(obj);
+            T value = _getter(obj);
             if (_writer.Equals(value, default))
                 return;
 
@@ -39,12 +38,12 @@ namespace BinarySerializer.Serializers
 
         public void Update(object obj, BinaryDataReader reader)
         {
-            _setter.Set(obj, _writer.Read(reader));
+            _setter(obj, _writer.Read(reader));
         }
 
         public void Serialize(object obj, BinaryDataWriter writer, IBaseline<byte> baseline)
         {
-            T value = _getter.Get(obj);
+            T value = _getter(obj);
             int hash = _writer.GetHashCode(value);
             int baseHash = baseline[_index];
             if (baseHash == 0 && Equals(value, default) || baseHash == hash)

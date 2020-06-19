@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
 using BinarySerializer.Data;
-using BinarySerializer.Expressions;
 using BinarySerializer.Properties;
 using BinarySerializer.Serializers.Baselines;
 
@@ -11,14 +10,14 @@ namespace BinarySerializer.Serializers
         where TWriter : IPrimitiveWriter<T>
     {
         private readonly byte _index;
-        private readonly Getter<Property<T>> _getter;
+        private readonly Func<object, Property<T>> _getter;
         private readonly TWriter _writer;
 
         protected PropertyBinarySerializer(byte index, Type ownerType, FieldInfo field, TWriter writer)
         {
             _index = index;
             _writer = writer;
-            _getter = new Getter<Property<T>>(ownerType, field);
+            _getter = Expressions.Expressions.InstantiateGetter<Property<T>>(ownerType, field);
         }
 
         void IBinarySerializer.Serialize(object obj, BinaryDataWriter writer, IBaseline baseline)
@@ -28,12 +27,12 @@ namespace BinarySerializer.Serializers
 
         public void Update(object obj, BinaryDataReader reader)
         {
-            _getter.Get(obj).Update(_writer.Read(reader));
+            _getter(obj).Update(_writer.Read(reader));
         }
 
         public void Serialize(object obj, BinaryDataWriter writer)
         {
-            Property<T> property = _getter.Get(obj);
+            Property<T> property = _getter(obj);
             if (_writer.Equals(property.Value, default))
                 return;
 
@@ -43,7 +42,7 @@ namespace BinarySerializer.Serializers
 
         public void Serialize(object obj, BinaryDataWriter writer, IBaseline<byte> baseline)
         {
-            Property<T> property = _getter.Get(obj);
+            Property<T> property = _getter(obj);
             if (baseline[_index] == property.Version)
                 return;
 
