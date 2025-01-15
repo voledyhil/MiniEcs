@@ -182,11 +182,6 @@ Baseline<uint> baseline = new Baseline<uint>();
 data = _world.Serialize(filterBDnA, baseline);
 ```
 
-## Examples
-### [MiniEcsPhysics](https://github.com/voledyhil/MiniEcsPhysics)
-Implementing a simple 2D isometric physical using MiniEcs framework
-![Preview](/images/preview.gif)
-
 ### Stress Test
 
 The [test](https://github.com/voledyhil/MiniEcs/blob/master/MiniEcs.Benchmark/ComplexTest.cs) involves creating, filtering, and deleting entities.
